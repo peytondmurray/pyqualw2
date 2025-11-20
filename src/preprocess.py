@@ -3,8 +3,14 @@ import pandas as pd
 import os
 
 def main(model_directory: str):
-    '''
-    '''
+    """
+
+    Parameters
+    ----------
+    model_directory : str
+
+
+    """
     working_directory = os.getcwd()
 
     model_path = os.path.join(working_directory, model_directory)
