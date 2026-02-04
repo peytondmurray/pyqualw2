@@ -478,17 +478,17 @@ packages:
   requires_python: '>=3.8'
 - pypi: ./
   name: pyqualw2
-  version: 0.0.1
-  sha256: 45d1af7b8b1833f2f2e494f476a86a2c3211ba900ae7abeb20d070b91a5039a5
+  version: 0.1.dev9+g07c81f481
+  sha256: 3d8fc6067c1c0f4108ac892ba31652dee6fa61e2fd39a53d25b21d679d819dff
   requires_dist:
-  - typer>=0.20
   - pandas
+  - pydantic-settings>=2.12.0
   - rich
   - tomli>=2.3.0,<3
-  - pydantic-settings>=2.12.0
+  - typer>=0.20
   - prek ; extra == 'dev'
-  - ruff ; extra == 'dev'
   - python-lsp-server ; extra == 'dev'
+  - ruff ; extra == 'dev'
   requires_python: '>=3.13'
 - conda: https://conda.anaconda.org/conda-forge/linux-64/python-3.14.0-h32b2ec7_102_cp314.conda
   build_number: 102

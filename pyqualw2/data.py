@@ -143,7 +143,7 @@ class Bathymetry(BaseData):
 
 
 @dataclass
-class Temperature(BaseData):
+class TemperatureProfile(BaseData):
     """A container for temperature data."""
 
     comment: str

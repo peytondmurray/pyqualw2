@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from pyqualw2.config import Config
-from pyqualw2.data import Bathymetry, Temperature
+from pyqualw2.data import Bathymetry, TemperatureProfile
 
 
 @pytest.fixture
@@ -38,7 +38,7 @@ def test_from_csv(sample_w2_con, sample_bathymetry, sample_temperature):
 
 
 def test_load_bathymetry(sample_bathymetry):
-    """Test that a Bathymetry can be loaded from a file on disk."""
+    """Test that Bathymetry.from_file can load data from a file."""
     bathy = Bathymetry.from_file(sample_bathymetry)
     assert bathy.filename == sample_bathymetry
     np.testing.assert_equal(
@@ -54,3 +54,10 @@ def test_load_bathymetry(sample_bathymetry):
 
     # 48 segments and 212 layers
     assert bathy.data.shape == (212, 48)
+
+
+def test_load_temperature(sample_temperature):
+    """Test that Temperature.from_file can load data from a file."""
+    temp = TemperatureProfile.from_file(sample_temperature)
+
+    assert temp.filename == sample_temperature
