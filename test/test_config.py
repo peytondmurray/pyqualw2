@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from pyqualw2.config import Config
-from pyqualw2.data import Bathymetry, Profile
+from pyqualw2.data import BathymetryInput, ProfileInput
 
 
 @pytest.fixture
@@ -39,7 +39,7 @@ def test_from_csv(sample_w2_con, sample_bathymetry, sample_temperature):
 
 def test_load_bathymetry(sample_bathymetry):
     """Test that Bathymetry.from_file can load data from a file."""
-    bathy = Bathymetry.from_file(sample_bathymetry)
+    bathy = BathymetryInput.from_file(sample_bathymetry)
     assert bathy.filename == sample_bathymetry
     np.testing.assert_equal(
         bathy.segment_data["DLX [m]"][0:3].to_numpy(), [0, 824.71, 824.71]
@@ -58,13 +58,17 @@ def test_load_bathymetry(sample_bathymetry):
 
 def test_load_temperature(sample_temperature):
     """Test that Temperature.from_file can load data from a file."""
-    temp = Profile.from_file(sample_temperature)
+    prof = ProfileInput.from_file(sample_temperature)
 
-    assert temp.filename == sample_temperature
-    breakpoint()
-    assert temp.comment == (
+    assert prof.filename == sample_temperature
+    assert prof.comment == (
         "File created from SJRRP Milerton Temperature Profile Viewer real string "
         "measurements"
     )
-    assert temp.profile_file == "2025-05-15_profile.csv"
-    assert temp.data["temperc"].shape == (24, 9)
+    assert prof.profile_file == "2025-05-15_profile.csv"
+    assert prof.data["TemperC"].shape == (24, 9)
+    assert prof.data["TDS mgl"].shape == (24, 9)
+    assert prof.data["DO mgl"].shape == (24, 9)
+
+    breakpoint()
+    assert prof.data["TemperC"]

@@ -11,8 +11,8 @@ from typing import Self
 import pandas as pd
 
 
-class BaseData(ABC):
-    """Base class for all data types."""
+class BaseInput(ABC):
+    """Base class for all input data types."""
 
     @classmethod
     @abstractmethod
@@ -32,8 +32,8 @@ class BaseData(ABC):
 
 
 @dataclass
-class Bathymetry(BaseData):
-    """Container for Bathymetry data."""
+class BathymetryInput(BaseInput):
+    """Container for bathymetry input data."""
 
     data: pd.DataFrame
     segment_data: pd.DataFrame
@@ -144,8 +144,8 @@ class Bathymetry(BaseData):
 
 
 @dataclass
-class Profile(BaseData):
-    """A container for profile data."""
+class ProfileInput(BaseInput):
+    """A container for profile (layer-dependent) input data."""
 
     comment: str
     data: dict[str, pd.DataFrame]
@@ -198,12 +198,10 @@ class Profile(BaseData):
             # Second line is a comment describing something about how the temperature
             # profile was created
             comment = lines[1].strip()
-
             lines = lines[2:]
 
             data = {}
-            breakpoint()
-            for name, df, lines in _get_next_block(lines):
+            for name, df in cls._iter_blocks(lines):
                 data[name] = df
 
         except Exception as e:
@@ -216,80 +214,86 @@ class Profile(BaseData):
             profile_file=profile_file,
         )
 
+    @staticmethod
+    def _iter_blocks(
+        lines: list[str],
+    ) -> Generator[tuple[str, pd.DataFrame, list[str]]]:
+        """Iterate through the data blocks in a profile data file.
 
-def _iter_blocks(
-    lines: list[str],
-) -> Generator[tuple[str, pd.DataFrame, list[str]]]:
-    """Iterate through the data blocks in a profile data file.
+        Profile files have blocks of data that look like this:
 
-    Profile files have blocks of data that look like this:
+        TemperC       T1      T1      T1      T1      T1      T1      T1      T1      T1
+                   20.75   20.35   20.04   19.93   19.74   18.58   15.19   14.32    13.7
+                   13.16   12.96    12.8   12.65   12.52   12.39   12.27   12.15   12.02
+                    11.9   11.78   11.66   11.56   11.49   11.42   11.35   11.28   11.19
+                   ...
 
-    TemperC       T1      T1      T1      T1      T1      T1      T1      T1      T1
-               20.75   20.35   20.04   19.93   19.74   18.58   15.19   14.32    13.7
-               13.16   12.96    12.8   12.65   12.52   12.39   12.27   12.15   12.02
-                11.9   11.78   11.66   11.56   11.49   11.42   11.35   11.28   11.19
-               ...
+        TDS mgl       C1      C1      C1      C1      C1      C1      C1      C1      C1
+                    32.0    32.0    32.0    32.0    32.0   31.79    30.8    29.5   28.19
+                   27.11    27.0    27.0   27.02   27.29   27.64   27.99   28.32   28.65
+                   28.98   29.34    29.7   30.12    30.7   31.29   31.86    32.0    32.0
+                   ...
 
-    TDS mgl       C1      C1      C1      C1      C1      C1      C1      C1      C1
-                32.0    32.0    32.0    32.0    32.0   31.79    30.8    29.5   28.19
-               27.11    27.0    27.0   27.02   27.29   27.64   27.99   28.32   28.65
-               28.98   29.34    29.7   30.12    30.7   31.29   31.86    32.0    32.0
-               ...
+        DO mgl        C2      C2      C2      C2      C2      C2      C2      C2      C2
+                    9.83    9.87    9.94    9.98    9.97    9.97   10.11   10.12   10.13
+                     9.9    9.88    9.87    9.85    9.84    9.83    9.82    9.81    9.79
+                    9.78    9.75    9.72    9.69    9.65    9.58     9.5    9.44     9.4
 
-    DO mgl        C2      C2      C2      C2      C2      C2      C2      C2      C2
-                9.83    9.87    9.94    9.98    9.97    9.97   10.11   10.12   10.13
-                 9.9    9.88    9.87    9.85    9.84    9.83    9.82    9.81    9.79
-                9.78    9.75    9.72    9.69    9.65    9.58     9.5    9.44     9.4
+        This function grabs the next block of data.
 
-    This function grabs the next block of data.
+        Parameters
+        ----------
+        lines : list[str]
+            Lines from a profile file. Data is assumed to start on lines[0], or lines[1] if
+            the current line is empty
+        Generator[tuple[str, np.NDArray]]
+            Tuples of dataset name and 1-D array of layer-dependent data
+        """
+        while lines:
+            i = 0
 
-    Parameters
-    ----------
-    lines : list[str]
-        Lines from a profile file. Data is assumed to start on lines[0], or lines[1] if
-        the current line is empty
-    Generator[tuple[str, pd.DataFrame, list[str]]]
-        Tuples of dataset name, dataframe, and remaning lines to be iterated over
-    """
-    while lines:
-        i = 0
+            if lines[0].strip() == "":
+                i += 1
 
-        if lines[0].strip() == "":
-            i += 1
+            if not lines[i:]:
+                return None
 
-        if not lines[i:]:
-            return None
+            split = re.split(r"\s+", lines[i].strip())
+            if not split:
+                raise ValueError("Unable to extract name of data from profile file")
 
-        split = re.split(r"\s+", lines[i].strip())
-        if not split:
-            raise ValueError("Unable to extract name of data from profile file")
+            # iterate backwards through the split line seeking the first "word" (which may have
+            # spaces...)
+            name = None
+            word = None
+            for j in range(len(split) - 1, -1, -1):
+                if word is None:
+                    word = split[j]
+                elif split[j] != word:
+                    name = " ".join(split[: j + 1])
+                    i += 1
+                    break
 
-        # iterate backwards through the split line seeking the first "word" (which may have
-        # spaces...)
-        name = None
-        word = None
-        for j in range(len(split) - 1, -1, -1):
-            if word is None:
-                word = split[j]
-            elif split[j] != word:
-                name = " ".join(split[: j + 1])
+            if name is None:
+                raise ValueError("Unable to extract name of data from profile block")
 
-        if name is None:
-            raise ValueError("Unable to extract name of data from profile block")
+            joined = StringIO()
+            for line in lines[i:]:
+                i += 1
 
-        joined = StringIO()
-        for line in lines[i:]:
-            i += 1
+                # An empty line indicates the end of the current block of data
+                if line.strip() == "":
+                    break
 
-            # An empty line indicates the end of the current block of data
-            if line.strip() == "":
-                break
+                joined.write(f"{line.strip()}\n")
 
-            joined.write(f"{line.strip()}\n")
+            lines = lines[i:]
 
-        lines = lines[i:]
-
-        # Need to reset the file pointer to the beginning for read_csv
-        joined.seek(0)
-        df = pd.read_csv(joined, sep=r"\s+", header=None, index_col=False)
-        yield name, df
+            # Need to reset the file pointer to the beginning for read_csv
+            joined.seek(0)
+            data = (
+                pd.read_csv(joined, sep=r"\s+", header=None, index_col=False)
+                .to_numpy()
+                .flatten()
+            )
+            yield name, data

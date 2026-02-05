@@ -4,13 +4,18 @@ from typing import Self
 
 import pandas as pd
 
-from .data import Bathymetry, Profile
+from .data import BathymetryInput, ProfileInput
 
 
 class Config:
     """A container that holds all configuration data for a simulation."""
 
-    def __init__(self, con: PathLike, bathymetry: Bathymetry, temperature: Profile):
+    def __init__(
+        self,
+        con: PathLike,
+        bathymetry: BathymetryInput,
+        temperature: ProfileInput,
+    ):
         self.con = con
         self.bathymetry = bathymetry
         self.temperature = temperature
@@ -40,8 +45,8 @@ class Config:
         """
         return cls(
             con=con,
-            bathymetry=Bathymetry.from_file(bathymetry),
-            temperature=Profile.from_file(temperature),
+            bathymetry=BathymetryInput.from_file(bathymetry),
+            temperature=ProfileInput.from_file(temperature),
         )
 
     @classmethod
