@@ -4,7 +4,7 @@ from typing import Self
 
 import pandas as pd
 
-from .data import BathymetryInput, ProfileInput
+from .inputs import BathymetryInput, ProfileInput
 
 
 class Config:
