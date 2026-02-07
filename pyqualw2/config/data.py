@@ -244,8 +244,8 @@ class ProfileInput(BaseInput):
         Parameters
         ----------
         lines : list[str]
-            Lines from a profile file. Data is assumed to start on lines[0], or lines[1] if
-            the current line is empty
+            Lines from a profile file. Data is assumed to start on lines[0], or lines[1]
+            if the current line is empty
         Generator[tuple[str, np.NDArray]]
             Tuples of dataset name and 1-D array of layer-dependent data
         """
@@ -262,8 +262,8 @@ class ProfileInput(BaseInput):
             if not split:
                 raise ValueError("Unable to extract name of data from profile file")
 
-            # iterate backwards through the split line seeking the first "word" (which may have
-            # spaces...)
+            # iterate backwards through the split line seeking the first "word" (which
+            # may have spaces...)
             name = None
             word = None
             for j in range(len(split) - 1, -1, -1):

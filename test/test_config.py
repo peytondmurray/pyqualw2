@@ -2,9 +2,9 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from pyqualw2.data import BathymetryInput, ProfileInput
 
 from pyqualw2.config import Config
-from pyqualw2.data import BathymetryInput, ProfileInput
 
 
 @pytest.fixture
