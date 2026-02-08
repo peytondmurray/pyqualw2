@@ -9,10 +9,13 @@ type ParseResult = tuple[Self, list[str]]
 
 
 class SubConfig(BaseSettings):
-    model_config = SettingsConfigDict(
-        extra="ignore",
-        env_prefix="PYQUALW2_"
-    )
+    """A container for 'configuration cards', i.e. subsections, of w2_con.csv.
+
+    Child subclasses may contain aliases for certain fields when there is an
+    inconsistency between the documentation and what w2_con.csv actually contains.
+    """
+
+    model_config = SettingsConfigDict(extra="ignore", env_prefix="PYQUALW2_")
 
     @model_validator(mode="before")
     @classmethod
@@ -29,13 +32,17 @@ class SubConfig(BaseSettings):
         dict[str, Any]
             Kwargs passed to the model
         """
-        fields = set(cls.model_fields.keys())
-        args = set(values.keys())
-        extra = args - fields
-        if extra:
+        fields = set()
+        aliases = set()
+        for field, info in cls.model_fields.items():
+            fields.add(field)
+            if info.alias is not None:
+                aliases.add(info.alias)
+
+        extras = set(values.keys()) - fields - aliases
+        if extras:
             warnings.warn(
-                f"Extra fields passed to {cls.__name__}: {extra}",
-                stacklevel=1
+                f"Extra fields passed to {cls.__name__}: {extras}", stacklevel=1
             )
         return values
 
@@ -78,7 +85,7 @@ class SubConfig(BaseSettings):
         """
         kwargs = {}
         for key, value in zip(lines[0].split(","), lines[1].split(","), strict=True):
-            if key != '' and value != '':
+            if key != "" and value != "":
                 kwargs[key.strip().lower()] = value.strip()
             else:
                 break
@@ -115,35 +122,50 @@ class SubConfig(BaseSettings):
         name = lines[0].split(",")[0].strip().lower()
         values = []
         for value in lines[1].split(","):
-            if value != '':
+            if value != "":
                 values.append(value)
             else:
                 break
 
         return cls(**{name: values}), lines[3:]
 
+    @classmethod
     def parse_matrix(cls, lines: list[str]) -> ParseResult:
-
-        fields = cls.model_fields().keys()
+        fields = list(cls.model_fields.keys())
 
         i = 0
         kwargs = defaultdict(list)
-        for line in enumerate(lines[1:]):
-            split = line.strip().split(',')
-            if split[0] == '':
+        for line in lines[1:]:
+            split = line.strip().split(",")
+            if split[0] == "":
                 break
 
             for value in split:
-                if value == '':
+                value = value.strip()
+                if value == "":
                     break
                 kwargs[fields[i]].append(value)
 
             i += 1
 
+        # Skip one line for each line consumed, one line for the section header, and one
+        # for the empty line after the section
+        return cls(**kwargs), lines[i + 2 :]
 
-        return cls(**kwargs), lines[i:]
+    def __contains__(self, name: str) -> bool:
+        """Return true if the given name exists as an attribute on the class.
 
+        Parameters
+        ----------
+        name : str
+            Name of a w2_con option
 
+        Returns
+        -------
+        bool
+            True if the subsection has the option, False otherwise
+        """
+        return name in self.__class__.model_fields
 
 
 class Title(SubConfig):
@@ -199,11 +221,11 @@ class Constituents(SubConfig):
 class Miscellaneous(SubConfig):
     nday: int
     selectc: str
-    habitatc: bool
+    habtatc: bool
     envirpc: bool
     aeratec: bool
     inituwl: bool
-    orcc: bool
+    orcc: bool = Field(alias="orgcc")
     sed_diag: bool
 
     @classmethod
@@ -222,10 +244,9 @@ class TimeControl(SubConfig):
 
 
 class TimestepControl(SubConfig):
-    # NDT in the docs, NDLT in w2_con.csv
     ndt: int = Field(alias="ndlt")
     dltmin: float
-    dltintr: bool
+    dltintr: bool = Field(alias="dltinter")
 
     @classmethod
     def parse(cls, lines: list[str]) -> ParseResult:
@@ -263,11 +284,7 @@ class TimestepLimitations(SubConfig):
 
     @classmethod
     def parse(cls, lines: list[str]) -> ParseResult:
-        return cls(
-            visc=lines[1].split(",")[0],
-            celc=lines[2].split(",")[0],
-            dltadd=lines[3].split(",")[0],
-        ), lines[4:]
+        return cls.parse_matrix(lines)
 
 
 # class Branch geometry(SubConfig):

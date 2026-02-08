@@ -395,6 +395,11 @@ class ProfileInput(BaseInput):
 
 
 class W2Con(BaseInput):
+    """A class to hold the main configuration data for a qualw2 simulation.
+
+    This is the Python object which holds w2_con.csv configuration data.
+    """
+
     __subconfigs__ = [
         Title,
         GridDimensions,
@@ -410,7 +415,23 @@ class W2Con(BaseInput):
     ]
 
     def __getattr__(self, name: str) -> Any:  # noqa: ANN401
-        return super().__getattribute__(self, name.upper())
+        """Get the value of the configuration option from its subconfig.
+
+        Because w2_con.csv is one giant configuration file, each qualw2 option specified
+        there has a unique name. It therefore makes sense to allow users to access each
+        possible option from the W2Con class itself, rather than having to access the
+        specific subconfig where that option is actually stored. This function allows
+        that to happen.
+
+        Furthermore to provide compatibility with the documentation and with w2_con.csv
+        itself, this function allows users to access option names using lowercase or
+        uppercase letters.
+        """
+        for config in self.configs:
+            if name in config:
+                return config.name
+
+        return super().__getattribute__(self, name.lower())
 
     @classmethod
     def from_file(cls, filename: PathLike) -> Self:
