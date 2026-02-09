@@ -245,7 +245,7 @@ class ProfileInput(BaseInput):
     @staticmethod
     def _iter_blocks(
         lines: list[str],
-    ) -> Generator[tuple[str, pd.DataFrame, list[str]]]:
+    ) -> Generator[tuple[str, pd.DataFrame]]:
         """Iterate through the data blocks in a profile data file.
 
         Profile files have blocks of data that look like this:
@@ -274,6 +274,9 @@ class ProfileInput(BaseInput):
         lines : list[str]
             Lines from a profile file. Data is assumed to start on lines[0], or lines[1]
             if the current line is empty
+
+        Returns
+        -------
         Generator[tuple[str, np.NDArray]]
             Tuples of dataset name and 1-D array of layer-dependent data
         """

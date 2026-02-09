@@ -22,11 +22,11 @@ from .options import (
     WithdrawalType,
 )
 
-type ParseResult = tuple[Self, int]
+type ParseResult = tuple[SubConfig, int]
 
 
 class ParseError(Exception):
-    def __init__(self, lines, lineno, message=""):
+    def __init__(self, lines: list[str], lineno: int, message: str = ""):
         nlines = len(lines)
         snippet = (
             indent(
@@ -87,7 +87,7 @@ class SubConfig(BaseSettings):
 
     @classmethod
     def parse(cls, lines: list[str], i: int) -> ParseResult:
-        pass
+        raise NotImplementedError
 
     @classmethod
     def parse_line_pair_table(cls, lines: list[str], i: int) -> ParseResult:
@@ -115,12 +115,14 @@ class SubConfig(BaseSettings):
         Parameters
         ----------
         lines : list[str]
-            List of lines to ingest; only the first 3 will be consumed
+            Lines to ingest; only lines[i:i+3] will be consumed
+        i : int
+            Line number where parsing should start
 
         Returns
         -------
         ParseResult
-            A SubConfig subclass instance, and remaining unparsed lines from the config
+            A SubConfig subclass instance, and the line number where parsing stopped
         """
         kwargs = {}
         for key, value in zip(
@@ -172,12 +174,13 @@ class SubConfig(BaseSettings):
         ----------
         lines : list[str]
             The lines to ingest
+        i : int
+            Line number where parsing should start
 
         Returns
         -------
         ParseResult
-            A SubConfig subclass instance, and the remaining lines from the config
-
+            A SubConfig subclass instance, and the line number where parsing stopped
         """
         fields = list(cls.model_fields.keys())
 

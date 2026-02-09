@@ -1,75 +1,75 @@
-from enum import Enum, auto
+from enum import Enum
 
 
 class WTYPEC(Enum):
-    FRESH = auto()
-    SALT = auto()
+    FRESH = "FRESH"
+    SALT = "SALT"
 
 
 class GRIDC(Enum):
-    RECT = auto()
-    TRAP = auto()
+    RECT = "RECT"
+    TRAP = "TRAP"
 
 
 class SLHTC(Enum):
-    TERM = auto()
-    ET = auto()
+    TERM = "TERM"
+    ET = "ET"
 
 
 class ICEC(Enum):
-    ON = auto()
-    ONWB = auto()
-    OFF = auto()
+    ON = "ON"
+    ONWB = "ONWB"
+    OFF = "OFF"
 
 
 class SLICEC(Enum):
-    SIMPLE = auto()
-    DETAIL = auto()
+    SIMPLE = "SIMPLE"
+    DETAIL = "DETAIL"
 
 
 class SLTRC(Enum):
-    ULTIMATE = auto()
-    QUICKEST = auto()
-    UPWIND = auto()
+    ULTIMATE = "ULTIMATE"
+    QUICKEST = "QUICKEST"
+    UPWIND = "UPWIND"
 
 
 class FRICC(Enum):
-    MANN = auto()
-    CHEZY = auto()
+    MANN = "MANN"
+    CHEZY = "CHEZY"
 
 
 class AZC(Enum):
-    NICK = auto()
-    PARAB = auto()
-    RNG = auto()
-    W2 = auto()
-    W2N = auto()
-    TKE = auto()
-    TKE1 = auto()
+    NICK = "NICK"
+    PARAB = "PARAB"
+    RNG = "RNG"
+    W2 = "W2"
+    W2N = "W2N"
+    TKE = "TKE"
+    TKE1 = "TKE1"
 
 
 class ImplicitExplicit(Enum):
-    IMP = auto()
-    EXP = auto()
+    IMP = "IMP"
+    EXP = "EXP"
 
 
 class SINKC(Enum):
-    POINT = auto()
-    LINE = auto()
+    POINT = "POINT"
+    LINE = "LINE"
 
 
 class WithdrawalType(Enum):
-    DOWN = auto()
-    LAT = auto()
+    DOWN = "DOWN"
+    LAT = "LAT"
 
 
 class InflowEntryType(Enum):
-    DISTR = auto()
-    DENSITY = auto()
-    SPECIFY = auto()
+    DISTR = "DISTR"
+    DENSITY = "DENSITY"
+    SPECIFY = "SPECIFY"
 
 
 class DYNGTC(Enum):
-    B = auto()
-    ZGT = auto()
-    FLOW = auto()
+    B = "B"
+    ZGT = "ZGT"
+    FLOW = "FLOW"
