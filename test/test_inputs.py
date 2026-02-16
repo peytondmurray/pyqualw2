@@ -1,4 +1,6 @@
+import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.testing.decorators import image_comparison
 
 from pyqualw2.config.inputs import BathymetryInput, ProfileInput, W2ConSimpleInput
 
@@ -111,3 +113,26 @@ def test_write_w2con(sample_w2_con, tmp_path):
     assert newlines[: obj.time_lineno] == lines[: obj.time_lineno]
     assert newlines[obj.time_lineno + 1 :] == lines[obj.time_lineno + 1 :]
     assert newlines[obj.time_lineno].startswith("1,2,3,")
+
+
+@image_comparison(
+    baseline_images=[
+        "plot_profile",
+        "plot_profile_temperc",
+        "plot_profile_tds",
+        "plot_profile_tds_do_ax",
+    ],
+    remove_text=True,
+    extensions=["png"],
+    style="mpl20",
+)
+def test_plot_profile(sample_profile):
+    """Test that the ProfileInput.plot_profile produces the correct plots."""
+    prof = ProfileInput.from_file(sample_profile)
+    prof.plot_profile()
+
+    prof.plot_profile(names=["TemperC"])
+    prof.plot_profile(names="TDS mgl")
+
+    fig, ax = plt.subplots(1, 1)
+    prof.plot_profile(names=["TDS mgl", "DO mgl"], ax=ax, linestyle="--")

@@ -14,6 +14,8 @@ import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
+from .util import relative_to_home_label
+
 
 class BaseInput(ABC):
     """Base class for all input data types."""
@@ -550,41 +552,66 @@ class ProfileInput(BaseInput):
 
         default_fmt = {"linestyle": "-", "marker": "o"}
 
+        if self.filename is None:
+            filename = ""
+        else:
+            filename = relative_to_home_label(self.filename)
+
         if ax is None:
             nplots = len(names)
             ncols = min(nplots, 3)  # Maximum of 3 columns
             nrows = int(nplots / ncols + 0.5)  # Round up to get number of rows needed
 
             fig, ax = plt.subplots(ncols=ncols, nrows=nrows)
+
+            # plt.subplots can return either an Axes or a NDArray[Axes]; we treat them
+            # the same below, so we ensure it's a NDArray[Axes] here.
+            if isinstance(ax, Axes):
+                ax = np.array([ax])
+
             for i, name in enumerate(names):
-                fmt = {"label": name} | default_fmt | fmt
-                axis = ax[i // nrows, i % nrows]
-                axis.plot(self.data.index, self.data[name], **fmt)
+                kw = {"label": name} | default_fmt | fmt
+                axis = ax.flat[i]  # type: ignore
+                axis.plot(self.data.index, self.data[name], **kw)
                 axis.set_xlabel("Layer Number")
                 axis.set_ylabel(name)
+                axis.set_title(name)
+
+            fig.suptitle(f"Profile Data: {filename}")
 
         elif isinstance(ax, Axes):
+            lines = []
             for i, name in enumerate(names):
-                fmt = {"label": name} | default_fmt | fmt
+                kw = {"label": name} | default_fmt | fmt
                 if i == 0:
                     axis = ax
                 else:
                     axis = ax.twinx()
-                    axis.spines.right.set_position(("axes", 1.2 * i))
+                    axis.spines.right.set_position(("axes", 1 + 0.1 * (i - 1)))
+
+                (line,) = axis.plot(self.data.index, self.data[name], f"C{i}", **kw)
+                lines.append(line)
 
                 axis.set_ylabel(name)
-                (line,) = axis.plot(self.data.index, self.data[name], fmt)
                 axis.yaxis.label.set_color(line.get_color())
+                axis.tick_params(axis="y", colors=line.get_color())
 
             ax.set_xlabel("Layer Number")
-            ax.legend()
+
+            # Set the legend on the last axis plotted; otherwise it can fall behind data
+            # points, and isn't draggable. See
+            # https://stackoverflow.com/a/28987970/8100451 for more information.
+            axis.legend(handles=lines, draggable=True)
+            ax.set_title("Profile data")
+            ax.get_figure().suptitle(f"Profile Data: {filename}")
             fig = None
 
         else:
             # This is some iterable of axes to plot on
-            if len(ax) != len(names):
+            if len(ax) != len(names):  # type: ignore
                 raise ValueError(
-                    f"Unsure how plot {len(names)} profile datasets on {len(ax)} axes. "
+                    f"Unsure how plot {len(names)} profile datasets on "
+                    f"{len(ax)} axes. "  # type: ignore
                     "Pass a single `Axes` instance to plot all datasets on the same "
                     "axes, pass `axes=None` to generate a new figure that "
                     "automatically generates a separate axis for each profile dataset, "
