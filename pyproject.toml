@@ -51,6 +51,11 @@ pyqualw2 = { path = ".", editable = true }
 
 [tool.pixi.tasks]
 
+[tool.pixi.dependencies]
+prek = ">=0.3.3,<0.4"
+ruff = ">=0.15.1,<0.16"
+pytest = ">=9.0.2,<10"
+
 [tool.ruff]
 line-length = 88
 

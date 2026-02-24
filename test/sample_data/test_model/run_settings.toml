@@ -1,0 +1,10 @@
+[model_details]
+    water_boday = "Millerton Reservoir"
+
+[run_settings]
+    name= "test"
+    description = """
+    testing run for development
+    """
+    time_start = 2025-01-01
+    time_end = 2025-12-31

@@ -1,3 +1,7 @@
+exclude: |
+  (?x)^(
+    pyqualw2/model_inputs/
+  )
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0

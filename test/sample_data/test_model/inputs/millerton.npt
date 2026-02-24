@@ -1,0 +1,46 @@
+MWH Millerton input control file millerton.npt
+Temperature outlet control - frequency of output for temperature
+OUT FREQ TFRQTMP
+        0.041667
+Structure outlet control based on time and temperature and branch
+DYNSTR1  CONTROL    NUM    FREQ
+             OFF      3    0.50
+
+DYNSTR2       JB      JS  YEARLY    TSTR    TEND    TEMP   NELEV   ELEV1   ELEV2   ELEV3   ELEV4   ELEV5   ELEV6   ELEV7   ELEV8   ELEV9  ELEV10
+1              1       2      ON     1.0    60.0   12.78       4  280.42  249.94  219.46  173.74
+2              1       2      ON    60.0   213.0   17.22       4  280.42  249.94  219.46  173.74
+3              1       2      ON   213.0   366.0   12.78       4  280.42  249.94  219.46  173.74
+
+MONITOR LOC ISEG    ELEV
+1             51    -185
+2             51    -185
+3             51    -185
+
+AUTO ELEVCONTROL
+1             ON
+2             ON
+3             ON
+
+SPLIT TEMP  CNTR    NUM
+             OFF      1
+
+Split TEMP    JB TTARGET   NOUTS     JS1     JS2
+1              1     15.       2       1       2
+
+THRESH1    TEMPN
+              13
+
+THRESH2 TEMPCRIT TEMPCRIT
+           11.11    11.11       ! 52 deg. F
+           15.55    15.55       ! 60 deg. F
+           10.00    10.00       ! 50 deg. F
+           12.22    12.22       ! 54 deg. F
+           13.33    13.33       ! 56 deg. F
+           14.46    14.46       ! 58 deg. F
+           16.67    16.67       ! 62 deg. F
+           17.78    17.78       ! 64 deg. F
+           18.89    18.89       ! 66 deg. F
+           20.00    20.00       ! 68 deg. F
+           21.11    21.11       ! 70 deg. F
+           23.89    23.89       ! 75 deg. F
+           26.67    26.67       ! 80 deg. F
