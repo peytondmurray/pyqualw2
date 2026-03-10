@@ -1,6 +1,19 @@
 import numpy as np
 
-from pyqualw2.config.inputs import BathymetryInput, ProfileInput, W2ConSimpleInput
+from pyqualw2.config.inputs import (
+    BathymetryInput,
+    MetDataInput,
+    ProfileInput,
+    W2ConSimpleInput,
+)
+
+
+def test_read_met_data_from_file(sample_met):
+    """Test that a met_data df is generated from a met_data input file."""
+    met_data = MetDataInput.from_file(sample_met)
+
+    assert met_data.filename == sample_met
+    assert met_data.met_data.columns[1] == "JDAY"
 
 
 def test_read_w2con_from_file(sample_w2_con):
@@ -46,7 +59,7 @@ def test_load_bathymetry(sample_bathymetry):
     assert bathy.data.shape == (212, 48)
 
 
-def test_load_temperature(sample_profile):
+def test_load_profile(sample_profile):
     """Test that Temperature.from_file can load data from a file."""
     prof = ProfileInput.from_file(sample_profile)
 
@@ -67,6 +80,15 @@ def test_load_temperature(sample_profile):
     np.testing.assert_equal(prof.data["TemperC"].to_numpy()[1:4], [20.35, 20.04, 19.93])
     np.testing.assert_equal(prof.data["TDS mgl"].to_numpy()[6:9], [30.8, 29.5, 28.19])
     np.testing.assert_equal(prof.data["DO mgl"].to_numpy()[1:4], [9.87, 9.94, 9.98])
+
+
+def test_write_met(sample_met, tmp_path):
+    """Test that writing bathymetry data to a file works as intended."""
+    path = tmp_path / "test.csv"
+    bathy = MetDataInput.from_file(sample_met)
+    bathy.to_file(path)
+
+    assert path.is_file()
 
 
 def test_write_bathymetry(sample_bathymetry, tmp_path):

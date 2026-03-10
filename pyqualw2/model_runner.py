@@ -8,18 +8,20 @@ from pathlib import Path
 class ModelRunner:
     """A class for exceuting the Qualw2 model."""
 
-    def __init__(self, config_list: list, output_dir: Path):
-        self.config_list = config_list
+    def __init__(self, configuration: dict, output_dir: Path):
+        self.config = configuration
         self.output_dir = output_dir
+        self.model_dir = configuration["model dir"]
+        self.wait_time = configuration["wait time"]
+        self.run_name = configuration["run name"]
 
     def run(self):
         """Run the model for each configuration in the list."""
-        for config in self.config_list:
-            wd = self.make_temp_wd()
-            self.copy_config_files(wd)
-            self.run_model(wd, wait_time=60)
-            run_output_dir = self.output_dir / str(config)
-            self.save_outputs(wd, run_output_dir)
+        wd = self.make_temp_wd()
+        self.copy_config_files(self.model_dir, wd)
+        self.run_model(wd, self.wait_time)
+        run_output_dir = self.output_dir / str(self.run_name)
+        self.save_outputs(wd, run_output_dir)
 
         return
 
@@ -27,10 +29,10 @@ class ModelRunner:
         """Make a temporary working directory."""
         return Path(tempfile.mkdtemp())
 
-    def copy_config_files(self, wd: Path):
+    def copy_config_files(self, model_dir: Path, wd: Path):
         """Copy the configuration files to the working directory."""
         wd = Path(wd)
-        src = Path(__file__).parent.parent / "test/sample_data/test_model/"
+        src = model_dir
 
         if not src.exists():
             raise FileNotFoundError

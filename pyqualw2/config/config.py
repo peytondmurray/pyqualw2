@@ -2,7 +2,12 @@ from os import PathLike
 from pathlib import Path
 from typing import Self
 
-from .inputs import BathymetryInput, ProfileInput, W2ConSimpleInput
+from .inputs import (
+    BathymetryInput,
+    MetDataInput,
+    ProfileInput,
+    W2ConSimpleInput,
+)
 
 
 class Config:
@@ -12,20 +17,23 @@ class Config:
         self,
         con: W2ConSimpleInput,
         bathymetry: BathymetryInput,
-        temperature: ProfileInput,
+        profile: ProfileInput,
+        met_data: MetDataInput,
     ):
         self.con = con
         self.bathymetry = bathymetry
-        self.temperature = temperature
+        self.profile = profile
+        self.met_data = met_data
 
     @classmethod
     def from_files(
         cls,
         con: PathLike,
         bathymetry: PathLike,
-        temperature: PathLike,
+        profile: PathLike,
+        met_data: PathLike,
     ) -> Self:
-        """Generate a Config from w2_con, bathymetry, and temperature profile files.
+        """Generate a Config from w2_con, bathymetry, and intial profile files.
 
         Parameters
         ----------
@@ -33,8 +41,10 @@ class Config:
             Path to a qualw2 configuration file, e.g. w2_con.csv
         bathymetry : PathLike
             Path to the bathymetry file, e.g. mbth_wb1.csv
-        temperature : PathLike
-            Path to the temperature file, e.g. mvpr1.csv
+        profile : PathLike
+            Path to the intial profile file, e.g. mvpr1.csv
+        met_data : PathLike
+            Path to the met data input file, e.g. mmet3.csv
 
         Returns
         -------
@@ -44,7 +54,8 @@ class Config:
         return cls(
             con=W2ConSimpleInput.from_file(con),
             bathymetry=BathymetryInput.from_file(bathymetry),
-            temperature=ProfileInput.from_file(temperature),
+            profile=ProfileInput.from_file(profile),
+            met_data=MetDataInput.from_file(met_data),
         )
 
     @classmethod
@@ -82,12 +93,10 @@ class Config:
             If True, create any necessary parent directories
         """
         path = Path(directory)
-        fnames = [
-            "w2_con.csv",
-            "mbth.csv",
-            "mvpr1.npt",
-        ]
+        fnames = ["w2_con.csv", "mbth.csv", "mvpr1.npt", "mmet.npt"]
         for fname, obj in zip(
-            fnames, [self.con, self.bathymetry, self.temperature], strict=True
+            fnames,
+            [self.con, self.bathymetry, self.profile, self.met_data],
+            strict=True,
         ):
             obj.to_file(path / fname, overwrite, create_parents)

@@ -609,6 +609,74 @@ class W2ConSimpleInput(BaseInput):
         self.content = "".join(lines)
 
 
+@dataclass
+class MetDataInput(BaseInput):
+    """A simple parser for the met data input to QualW2."""
+
+    met_data: pd.DataFrame
+    filename: PathLike | str | None = None
+
+    @classmethod
+    def from_file(cls, filename: PathLike | str) -> Self:
+        """Select and Parse met input file from database.
+
+        Parameters
+        ----------
+        filename : PathLike | str
+            Path to met data directory
+
+        Returns
+        -------
+        Self
+            A ojbect wrapping the selected year's met data input.
+        """
+        if Path(filename).suffix != ".csv":
+            raise NotImplementedError
+
+        return cls(
+            filename=filename,
+            met_data=pd.read_csv(
+                filename, parse_dates=True, date_format="%d:%m:%Y %H:%M"
+            ),
+        )
+
+    def to_file(
+        self,
+        filename: PathLike | str = "mmnet3.csv",
+        overwrite: bool = False,
+        create_parents: bool = False,
+    ):
+        """Write the met data to a csv file.
+
+        Parameters
+        ----------
+        filename : PathLike | str
+            Path where the data should be written
+        overwrite : bool
+            If True, overwrite an existing file
+        create_parents : bool
+            If True, create any necessary parent directories
+        """
+        path = Path(filename)
+        if path.suffix != ".csv":
+            raise NotImplementedError
+
+        _create_parents_or_fail(path, overwrite, create_parents)
+
+        self.met_data[self.met_data.columns[1:]].to_csv(filename, index=False)
+
+        # This pedantic formatting is required
+        # by the current windows binaries for CeQual-W2
+
+        blank_lines_for_formatting = "$\n\n"
+
+        with open(filename) as file:
+            not_formatted = file.read()
+
+        with open(filename, "w") as file:
+            file.write(blank_lines_for_formatting + not_formatted)
+
+
 def _create_parents_or_fail(
     path: PathLike,
     overwrite: bool = False,

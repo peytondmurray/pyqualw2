@@ -25,3 +25,9 @@ def sample_bathymetry(sample_data) -> Path:
 def sample_profile(sample_data) -> Path:
     """Get the path to an example profile file."""
     return sample_data / "mvpr1.npt"
+
+
+@pytest.fixture
+def sample_met(sample_data) -> Path:
+    """Get the path to an example met data input file."""
+    return sample_data / "test_met.csv"
