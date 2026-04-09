@@ -4,42 +4,51 @@ import tempfile
 import time
 from pathlib import Path
 
+from pyqualw2.config.config import Config
+
 
 class ModelRunner:
-    """A class for exceuting the Qualw2 model."""
+    """A class for exceuting the Qualw2 model.
 
-    def __init__(self, configuration: dict, output_dir: Path):
+    Parameters
+    ----------
+    configuration : Config
+        The configuration to run the model with.
+    output_dir : Path
+        The directory to save the output files to.
+    source_dir : Path
+        The directory to read the source files from.
+    run_name : str
+        The name of the run.
+    wait_time : int, optional
+        The time to wait for the model to finish running, by default 30 seconds.
+    """
+
+    def __init__(
+        self,
+        configuration: Config,
+        output_dir: Path,
+        source_dir: Path,
+        run_name: str,
+        wait_time: int = 30,
+    ):
         self.config = configuration
         self.output_dir = output_dir
-        self.model_dir = configuration["model dir"]
-        self.wait_time = configuration["wait time"]
-        self.run_name = configuration["run name"]
+        self.source_dir = source_dir
+        self.run_name = run_name
+        self.wait_time = wait_time if wait_time is not None else 30
 
     def run(self):
         """Run the model for each configuration in the list."""
         wd = self.make_temp_wd()
-        self.copy_config_files(self.model_dir, wd)
-        self.run_model(wd, self.wait_time)
-        run_output_dir = self.output_dir / str(self.run_name)
+        self.config.to_directory(self.source_dir, wd, overwrite=True)
+        self.run_model(wd)
+        run_output_dir = self.output_dir / self.run_name
         self.save_outputs(wd, run_output_dir)
-
-        return
 
     def make_temp_wd(self) -> Path:
         """Make a temporary working directory."""
         return Path(tempfile.mkdtemp())
-
-    def copy_config_files(self, model_dir: Path, wd: Path):
-        """Copy the configuration files to the working directory."""
-        wd = Path(wd)
-        src = model_dir
-
-        if not src.exists():
-            raise FileNotFoundError
-
-        for file in src.iterdir():
-            destination = wd / file.name
-            file.copy(destination, preserve_metadata=True)  # type: ignore
 
     def save_outputs(self, wd: Path, output_dir: Path):
         """Save the output files to the output directory."""
@@ -51,14 +60,16 @@ class ModelRunner:
 
         return
 
-    def run_model(self, wd: Path, wait_time: int):
+    def run_model(self, wd: Path):
         """Run the model for the given configuration."""
         model_path = wd / "w2_v45_64.exe"
         try:
             if os.name == "nt":  # Windows
                 creationflags = getattr(subprocess, "CREATE_NEW_CONSOLE", 0)
                 process = subprocess.Popen(
-                    ["w2_v45_64.exe"], creationflags=creationflags
+                    [str(model_path)],
+                    creationflags=creationflags,
+                    cwd=str(wd),
                 )
             else:  # Linux/Unix
                 process = subprocess.Popen(
@@ -79,7 +90,9 @@ class ModelRunner:
             # Track the last time any file was modified
             last_activity_time = time.time()
 
-            while process.poll() is None and (time.time() - start_time) < wait_time:
+            while (
+                process.poll() is None and (time.time() - start_time) < self.wait_time
+            ):
                 # Check if any file has been modified recently
                 any_file_active = False
                 for file in output_files:

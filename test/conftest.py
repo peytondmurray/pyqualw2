@@ -31,3 +31,15 @@ def sample_profile(sample_data) -> Path:
 def sample_met(sample_data) -> Path:
     """Get the path to an example met data input file."""
     return sample_data / "test_met.csv"
+
+
+@pytest.fixture
+def sample_temp(sample_data) -> Path:
+    """Get the path to an example temp inflow data input file."""
+    return sample_data / "test_temp.csv"
+
+
+@pytest.fixture
+def sample_flow(sample_data) -> Path:
+    """Get the path to an example inflow data input file."""
+    return sample_data / "test_flow.csv"

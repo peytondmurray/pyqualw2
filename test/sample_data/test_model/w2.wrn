@@ -1,0 +1,978 @@
+
+ ************* Subtract layer 131 at Julian day = 35564.046 NIT = 33  IZMIN =4 *************
+
+ ************* Subtract layer 132 at Julian day = 35564.048 NIT = 45  IZMIN =4 *************
+
+ ************* Subtract layer 133 at Julian day = 35564.048 NIT = 52  IZMIN =4 *************
+
+ ************* Subtract layer 134 at Julian day = 35564.068 NIT = 224  IZMIN =5 *************
+
+ *************    Add layer 134 at Julian day = 35564.077   NIT = 272  IZMIN =5*************
+
+ *************    Add layer 133 at Julian day = 35564.761   NIT = 6766  IZMIN =4*************
+
+ *************    Add layer 132 at Julian day = 35564.761   NIT = 6773  IZMIN =4*************
+
+ ************* Subtract layer 132 at Julian day = 35564.763 NIT = 6786  IZMIN =4 *************
+
+ ************* Subtract layer 133 at Julian day = 35564.763 NIT = 6793  IZMIN =4 *************
+
+ *************    Add layer 133 at Julian day = 35564.766   NIT = 6812  IZMIN =4*************
+
+ *************    Add layer 132 at Julian day = 35564.766   NIT = 6817  IZMIN =4*************
+
+ ************* Subtract layer 132 at Julian day = 35564.768 NIT = 6833  IZMIN =4 *************
+
+ ************* Subtract layer 133 at Julian day = 35564.769 NIT = 6838  IZMIN =4 *************
+
+ *************    Add layer 133 at Julian day = 35564.770   NIT = 6848  IZMIN =4*************
+
+ *************    Add layer 132 at Julian day = 35564.772   NIT = 6864  IZMIN =4*************
+
+ *************    Add layer 131 at Julian day = 35564.772   NIT = 6867  IZMIN =4*************
+
+ *************    Add layer 130 at Julian day = 35564.773   NIT = 6871  IZMIN =4*************
+
+                  Add segments 2 through 2
+
+                  Add segments 34 through 34
+
+ ************* Subtract layer 130 at Julian day = 35564.773 NIT = 6875  IZMIN =3 *************
+
+                  Subtract segments 2 through 2
+
+                  Subtract segments 34 through 34
+
+ ************* Subtract layer 131 at Julian day = 35564.774 NIT = 6886  IZMIN =3 *************
+
+ ************* Subtract layer 132 at Julian day = 35564.774 NIT = 6897  IZMIN =3 *************
+
+ ************* Subtract layer 133 at Julian day = 35564.775 NIT = 6916  IZMIN =3 *************
+
+ ************* Subtract layer 134 at Julian day = 35564.776 NIT = 6940  IZMIN =4 *************
+
+ *************    Add layer 134 at Julian day = 35564.777   NIT = 6948  IZMIN =4*************
+
+ *************    Add layer 133 at Julian day = 35564.778   NIT = 6954  IZMIN =4*************
+
+ ************* Subtract layer 133 at Julian day = 35564.786 NIT = 7047  IZMIN =4 *************
+
+ *************    Add layer 133 at Julian day = 35564.789   NIT = 7066  IZMIN =4*************
+
+ *************    Add layer 132 at Julian day = 35564.789   NIT = 7073  IZMIN =4*************
+
+ ************* Subtract layer 132 at Julian day = 35564.791 NIT = 7094  IZMIN =4 *************
+
+ *************    Add layer 132 at Julian day = 35565.115   NIT = 9798  IZMIN =4*************
+
+ ************* Subtract layer 132 at Julian day = 35565.118 NIT = 9822  IZMIN =4 *************
+
+ ************* Subtract layer 133 at Julian day = 35565.119 NIT = 9831  IZMIN =4 *************
+
+ *************    Add layer 133 at Julian day = 35565.120   NIT = 9838  IZMIN =4*************
+
+ *************    Add layer 132 at Julian day = 35565.121   NIT = 9846  IZMIN =4*************
+
+ ************* Subtract layer 132 at Julian day = 35565.126 NIT = 9895  IZMIN =4 *************
+
+ ************* Subtract layer 133 at Julian day = 35565.127 NIT = 9905  IZMIN =4 *************
+
+ *************    Add layer 133 at Julian day = 35565.128   NIT = 9911  IZMIN =4*************
+
+ *************    Add layer 132 at Julian day = 35565.129   NIT = 9919  IZMIN =4*************
+
+ *************    Add layer 131 at Julian day = 35565.129   NIT = 9923  IZMIN =4*************
+
+ *************    Add layer 130 at Julian day = 35565.130   NIT = 9927  IZMIN =4*************
+
+                  Add segments 2 through 2
+
+                  Add segments 34 through 34
+
+ *************    Add layer 129 at Julian day = 35565.131   NIT = 9941  IZMIN =3*************
+
+ *************    Add layer 128 at Julian day = 35565.132   NIT = 9945  IZMIN =3*************
+
+ *************    Add layer 127 at Julian day = 35565.134   NIT = 9961  IZMIN =3*************
+
+ ************* Subtract layer 127 at Julian day = 35565.145 NIT = 10059  IZMIN =4 *************
+
+ *************    Add layer 127 at Julian day = 35565.154   NIT = 10125  IZMIN =3*************
+
+ ************* Subtract layer 127 at Julian day = 35565.162 NIT = 10196  IZMIN =4 *************
+
+ ************* Subtract layer 128 at Julian day = 35565.165 NIT = 10220  IZMIN =4 *************
+
+ *************    Add layer 128 at Julian day = 35565.169   NIT = 10256  IZMIN =4*************
+
+ *************    Add layer 127 at Julian day = 35565.189   NIT = 10396  IZMIN =3*************
+
+ ************* Subtract layer 127 at Julian day = 35565.198 NIT = 10473  IZMIN =4 *************
+
+ *************    Add layer 127 at Julian day = 35565.419   NIT = 12081  IZMIN =3*************
+
+ *************    Add layer 126 at Julian day = 35565.919   NIT = 16124  IZMIN =3*************
+
+ ************* Subtract layer 126 at Julian day = 35566.367 NIT = 19238  IZMIN =3 *************
+
+ *************    Add layer 126 at Julian day = 35566.369   NIT = 19252  IZMIN =3*************
+
+ ************* Subtract layer 126 at Julian day = 35566.376 NIT = 19304  IZMIN =3 *************
+
+ *************    Add layer 126 at Julian day = 35566.377   NIT = 19318  IZMIN =3*************
+
+ ************* Subtract layer 126 at Julian day = 35566.379 NIT = 19334  IZMIN =3 *************
+
+ *************    Add layer 126 at Julian day = 35566.381   NIT = 19349  IZMIN =3*************
+
+ ************* Subtract layer 126 at Julian day = 35566.383 NIT = 19366  IZMIN =3 *************
+
+ *************    Add layer 126 at Julian day = 35566.385   NIT = 19382  IZMIN =3*************
+
+ ************* Subtract layer 126 at Julian day = 35566.387 NIT = 19398  IZMIN =3 *************
+
+ *************    Add layer 126 at Julian day = 35566.389   NIT = 19414  IZMIN =3*************
+
+ ************* Subtract layer 126 at Julian day = 35566.392 NIT = 19431  IZMIN =3 *************
+
+ *************    Add layer 126 at Julian day = 35566.393   NIT = 19447  IZMIN =3*************
+
+ ************* Subtract layer 126 at Julian day = 35566.396 NIT = 19463  IZMIN =3 *************
+
+ *************    Add layer 126 at Julian day = 35566.398   NIT = 19480  IZMIN =3*************
+
+ ************* Subtract layer 126 at Julian day = 35566.400 NIT = 19496  IZMIN =3 *************
+
+ *************    Add layer 126 at Julian day = 35566.402   NIT = 19513  IZMIN =3*************
+
+ ************* Subtract layer 126 at Julian day = 35566.404 NIT = 19529  IZMIN =3 *************
+
+ ************* Subtract layer 127 at Julian day = 35566.404 NIT = 19536  IZMIN =3 *************
+
+ *************    Add layer 127 at Julian day = 35566.405   NIT = 19546  IZMIN =3*************
+
+ *************    Add layer 126 at Julian day = 35566.406   NIT = 19552  IZMIN =3*************
+
+ *************    Add layer 125 at Julian day = 35566.406   NIT = 19555  IZMIN =3*************
+
+ *************    Add layer 124 at Julian day = 35566.407   NIT = 19558  IZMIN =3*************
+
+ ************* Subtract layer 124 at Julian day = 35566.408 NIT = 19564  IZMIN =2 *************
+
+ ************* Subtract layer 125 at Julian day = 35566.409 NIT = 19572  IZMIN =2 *************
+
+ ************* Subtract layer 126 at Julian day = 35566.410 NIT = 19579  IZMIN =2 *************
+
+ ************* Subtract layer 127 at Julian day = 35566.411 NIT = 19586  IZMIN =3 *************
+
+ ************* Subtract layer 128 at Julian day = 35566.411 NIT = 19593  IZMIN =3 *************
+
+ *************    Add layer 128 at Julian day = 35566.412   NIT = 19598  IZMIN =3*************
+
+ *************    Add layer 127 at Julian day = 35566.412   NIT = 19601  IZMIN =3*************
+
+ *************    Add layer 126 at Julian day = 35566.412   NIT = 19603  IZMIN =3*************
+
+ *************    Add layer 125 at Julian day = 35566.413   NIT = 19608  IZMIN =3*************
+
+ *************    Add layer 124 at Julian day = 35566.414   NIT = 19615  IZMIN =3*************
+
+ ************* Subtract layer 124 at Julian day = 35566.417 NIT = 19629  IZMIN =2 *************
+
+ ************* Subtract layer 125 at Julian day = 35566.418 NIT = 19636  IZMIN =2 *************
+
+ ************* Subtract layer 126 at Julian day = 35566.418 NIT = 19643  IZMIN =2 *************
+
+ ************* Subtract layer 127 at Julian day = 35566.419 NIT = 19650  IZMIN =2 *************
+
+ ************* Subtract layer 128 at Julian day = 35566.419 NIT = 19656  IZMIN =2 *************
+
+ ************* Subtract layer 129 at Julian day = 35566.419 NIT = 19663  IZMIN =2 *************
+
+ ************* Subtract layer 130 at Julian day = 35566.419 NIT = 19669  IZMIN =2 *************
+
+                  Subtract segments 2 through 2
+
+                  Subtract segments 34 through 34
+
+ *************    Add layer 130 at Julian day = 35566.419   NIT = 19670  IZMIN =3*************
+
+                  Add segments 2 through 2
+
+                  Add segments 34 through 34
+
+ *************    Add layer 129 at Julian day = 35566.419   NIT = 19670  IZMIN =3*************
+
+ *************    Add layer 128 at Julian day = 35566.419   NIT = 19670  IZMIN =3*************
+
+ *************    Add layer 127 at Julian day = 35566.419   NIT = 19670  IZMIN =3*************
+
+ *************    Add layer 126 at Julian day = 35566.419   NIT = 19670  IZMIN =3*************
+
+ ************* Subtract layer 126 at Julian day = 35566.419 NIT = 19676  IZMIN =3 *************
+
+ ************* Subtract layer 127 at Julian day = 35566.419 NIT = 19683  IZMIN =3 *************
+
+ ************* Subtract layer 128 at Julian day = 35566.419 NIT = 19688  IZMIN =3 *************
+
+ *************    Add layer 128 at Julian day = 35566.420   NIT = 19699  IZMIN =3*************
+
+ *************    Add layer 127 at Julian day = 35566.420   NIT = 19701  IZMIN =3*************
+
+ *************    Add layer 126 at Julian day = 35566.420   NIT = 19702  IZMIN =3*************
+
+ *************    Add layer 125 at Julian day = 35566.420   NIT = 19704  IZMIN =3*************
+
+ *************    Add layer 124 at Julian day = 35566.420   NIT = 19706  IZMIN =3*************
+
+ *************    Add layer 123 at Julian day = 35566.421   NIT = 19710  IZMIN =4*************
+
+ ************* Subtract layer 123 at Julian day = 35566.422 NIT = 19716  IZMIN =3 *************
+
+ ************* Subtract layer 124 at Julian day = 35566.426 NIT = 19735  IZMIN =2 *************
+
+ *************    Add layer 124 at Julian day = 35566.430   NIT = 19769  IZMIN =3*************
+
+ *************    Add layer 123 at Julian day = 35566.431   NIT = 19776  IZMIN =3*************
+
+ ************* Subtract layer 123 at Julian day = 35566.435 NIT = 19793  IZMIN =2 *************
+
+ ************* Subtract layer 124 at Julian day = 35566.437 NIT = 19805  IZMIN =3 *************
+
+ ************* Subtract layer 125 at Julian day = 35566.440 NIT = 19819  IZMIN =3 *************
+
+ ************* Subtract layer 126 at Julian day = 35566.444 NIT = 19848  IZMIN =3 *************
+
+ ************* Subtract layer 127 at Julian day = 35566.444 NIT = 19857  IZMIN =3 *************
+
+ *************    Add layer 127 at Julian day = 35566.445   NIT = 19861  IZMIN =3*************
+
+ *************    Add layer 126 at Julian day = 35566.445   NIT = 19867  IZMIN =3*************
+
+ *************    Add layer 125 at Julian day = 35566.446   NIT = 19871  IZMIN =3*************
+
+ *************    Add layer 124 at Julian day = 35566.446   NIT = 19876  IZMIN =3*************
+
+ *************    Add layer 123 at Julian day = 35566.448   NIT = 19887  IZMIN =3*************
+
+ ************* Subtract layer 123 at Julian day = 35566.452 NIT = 19905  IZMIN =2 *************
+
+ ************* Subtract layer 124 at Julian day = 35566.454 NIT = 19913  IZMIN =2 *************
+
+ ************* Subtract layer 125 at Julian day = 35566.455 NIT = 19924  IZMIN =3 *************
+
+ ************* Subtract layer 126 at Julian day = 35566.461 NIT = 19969  IZMIN =3 *************
+
+ *************    Add layer 126 at Julian day = 35566.462   NIT = 19982  IZMIN =3*************
+
+ *************    Add layer 125 at Julian day = 35566.464   NIT = 19998  IZMIN =3*************
+
+ *************    Add layer 124 at Julian day = 35566.465   NIT = 20003  IZMIN =3*************
+
+ *************    Add layer 123 at Julian day = 35566.466   NIT = 20008  IZMIN =3*************
+
+ ************* Subtract layer 123 at Julian day = 35566.469 NIT = 20022  IZMIN =2 *************
+
+ ************* Subtract layer 124 at Julian day = 35566.470 NIT = 20031  IZMIN =2 *************
+
+ ************* Subtract layer 125 at Julian day = 35566.471 NIT = 20039  IZMIN =2 *************
+
+ ************* Subtract layer 126 at Julian day = 35566.471 NIT = 20046  IZMIN =2 *************
+
+ ************* Subtract layer 127 at Julian day = 35566.471 NIT = 20053  IZMIN =2 *************
+
+ ************* Subtract layer 128 at Julian day = 35566.472 NIT = 20059  IZMIN =2 *************
+
+ ************* Subtract layer 129 at Julian day = 35566.472 NIT = 20065  IZMIN =2 *************
+
+ ************* Subtract layer 130 at Julian day = 35566.472 NIT = 20071  IZMIN =2 *************
+
+                  Subtract segments 2 through 2
+
+                  Subtract segments 34 through 34
+
+ *************    Add layer 130 at Julian day = 35566.472   NIT = 20072  IZMIN =3*************
+
+                  Add segments 2 through 2
+
+                  Add segments 34 through 34
+
+ *************    Add layer 129 at Julian day = 35566.472   NIT = 20072  IZMIN =3*************
+
+ *************    Add layer 128 at Julian day = 35566.472   NIT = 20072  IZMIN =3*************
+
+ *************    Add layer 127 at Julian day = 35566.472   NIT = 20072  IZMIN =3*************
+
+ *************    Add layer 126 at Julian day = 35566.472   NIT = 20072  IZMIN =3*************
+
+ *************    Add layer 125 at Julian day = 35566.472   NIT = 20072  IZMIN =3*************
+
+ ************* Subtract layer 125 at Julian day = 35566.472 NIT = 20086  IZMIN =3 *************
+
+ ************* Subtract layer 126 at Julian day = 35566.472 NIT = 20092  IZMIN =3 *************
+
+ ************* Subtract layer 127 at Julian day = 35566.472 NIT = 20099  IZMIN =3 *************
+
+ *************    Add layer 127 at Julian day = 35566.472   NIT = 20104  IZMIN =3*************
+
+ *************    Add layer 126 at Julian day = 35566.473   NIT = 20107  IZMIN =3*************
+
+ *************    Add layer 125 at Julian day = 35566.473   NIT = 20108  IZMIN =3*************
+
+ *************    Add layer 124 at Julian day = 35566.473   NIT = 20110  IZMIN =3*************
+
+ *************    Add layer 123 at Julian day = 35566.473   NIT = 20112  IZMIN =3*************
+
+ *************    Add layer 122 at Julian day = 35566.474   NIT = 20118  IZMIN =5*************
+
+ ************* Subtract layer 122 at Julian day = 35566.475 NIT = 20121  IZMIN =3 *************
+
+ ************* Subtract layer 123 at Julian day = 35566.478 NIT = 20136  IZMIN =2 *************
+
+ ************* Subtract layer 124 at Julian day = 35566.480 NIT = 20145  IZMIN =2 *************
+
+ ************* Subtract layer 125 at Julian day = 35566.481 NIT = 20151  IZMIN =3 *************
+
+ *************    Add layer 125 at Julian day = 35566.483   NIT = 20170  IZMIN =3*************
+
+ ************* Subtract layer 125 at Julian day = 35566.487 NIT = 20196  IZMIN =2 *************
+
+ ************* Subtract layer 126 at Julian day = 35566.487 NIT = 20203  IZMIN =2 *************
+
+ ************* Subtract layer 127 at Julian day = 35566.488 NIT = 20209  IZMIN =2 *************
+
+ ************* Subtract layer 128 at Julian day = 35566.488 NIT = 20215  IZMIN =2 *************
+
+ ************* Subtract layer 129 at Julian day = 35566.488 NIT = 20221  IZMIN =2 *************
+
+ ************* Subtract layer 130 at Julian day = 35566.488 NIT = 20227  IZMIN =2 *************
+
+                  Subtract segments 2 through 2
+
+                  Subtract segments 34 through 34
+
+ *************    Add layer 130 at Julian day = 35566.488   NIT = 20228  IZMIN =3*************
+
+                  Add segments 2 through 2
+
+                  Add segments 34 through 34
+
+ *************    Add layer 129 at Julian day = 35566.488   NIT = 20228  IZMIN =3*************
+
+ *************    Add layer 128 at Julian day = 35566.488   NIT = 20228  IZMIN =3*************
+
+ *************    Add layer 127 at Julian day = 35566.488   NIT = 20228  IZMIN =3*************
+
+ *************    Add layer 126 at Julian day = 35566.488   NIT = 20228  IZMIN =3*************
+
+ *************    Add layer 125 at Julian day = 35566.488   NIT = 20228  IZMIN =3*************
+
+ *************    Add layer 124 at Julian day = 35566.488   NIT = 20228  IZMIN =3*************
+
+ *************    Add layer 123 at Julian day = 35566.488   NIT = 20228  IZMIN =3*************
+
+ ************* Subtract layer 123 at Julian day = 35566.488 NIT = 20238  IZMIN =3 *************
+
+ ************* Subtract layer 124 at Julian day = 35566.488 NIT = 20247  IZMIN =3 *************
+
+ ************* Subtract layer 125 at Julian day = 35566.488 NIT = 20254  IZMIN =3 *************
+
+ *************    Add layer 125 at Julian day = 35566.489   NIT = 20261  IZMIN =3*************
+
+ *************    Add layer 124 at Julian day = 35566.489   NIT = 20263  IZMIN =3*************
+
+ *************    Add layer 123 at Julian day = 35566.489   NIT = 20265  IZMIN =3*************
+
+ *************    Add layer 122 at Julian day = 35566.489   NIT = 20267  IZMIN =4*************
+
+ ************* Subtract layer 122 at Julian day = 35566.491 NIT = 20279  IZMIN =3 *************
+
+ ************* Subtract layer 123 at Julian day = 35566.495 NIT = 20296  IZMIN =2 *************
+
+ ************* Subtract layer 124 at Julian day = 35566.497 NIT = 20305  IZMIN =3 *************
+
+ ************* Subtract layer 125 at Julian day = 35566.499 NIT = 20319  IZMIN =3 *************
+
+ ************* Subtract layer 126 at Julian day = 35566.504 NIT = 20355  IZMIN =3 *************
+
+ ************* Subtract layer 127 at Julian day = 35566.506 NIT = 20374  IZMIN =3 *************
+
+ *************    Add layer 127 at Julian day = 35566.507   NIT = 20388  IZMIN =3*************
+
+ *************    Add layer 126 at Julian day = 35566.507   NIT = 20391  IZMIN =3*************
+
+ *************    Add layer 125 at Julian day = 35566.508   NIT = 20395  IZMIN =3*************
+
+ *************    Add layer 124 at Julian day = 35566.508   NIT = 20399  IZMIN =3*************
+
+ *************    Add layer 123 at Julian day = 35566.510   NIT = 20409  IZMIN =3*************
+
+ *************    Add layer 122 at Julian day = 35566.512   NIT = 20422  IZMIN =3*************
+
+ ************* Subtract layer 122 at Julian day = 35566.515 NIT = 20433  IZMIN =2 *************
+
+ ************* Subtract layer 123 at Julian day = 35566.517 NIT = 20445  IZMIN =3 *************
+
+ *************    Add layer 123 at Julian day = 35566.522   NIT = 20474  IZMIN =3*************
+
+ *************    Add layer 122 at Julian day = 35566.527   NIT = 20505  IZMIN =3*************
+
+ ************* Subtract layer 122 at Julian day = 35566.531 NIT = 20518  IZMIN =2 *************
+
+ ************* Subtract layer 123 at Julian day = 35566.537 NIT = 20550  IZMIN =2 *************
+
+ *************    Add layer 123 at Julian day = 35566.540   NIT = 20573  IZMIN =3*************
+
+ *************    Add layer 122 at Julian day = 35566.547   NIT = 20610  IZMIN =3*************
+
+ ************* Subtract layer 122 at Julian day = 35566.550 NIT = 20621  IZMIN =2 *************
+
+ ************* Subtract layer 123 at Julian day = 35566.553 NIT = 20638  IZMIN =2 *************
+
+ *************    Add layer 123 at Julian day = 35566.557   NIT = 20669  IZMIN =3*************
+
+ *************    Add layer 122 at Julian day = 35566.560   NIT = 20684  IZMIN =3*************
+
+ ************* Subtract layer 122 at Julian day = 35566.563 NIT = 20696  IZMIN =2 *************
+
+ ************* Subtract layer 123 at Julian day = 35566.565 NIT = 20705  IZMIN =2 *************
+
+ ************* Subtract layer 124 at Julian day = 35566.567 NIT = 20718  IZMIN =2 *************
+
+ ************* Subtract layer 125 at Julian day = 35566.569 NIT = 20730  IZMIN =2 *************
+
+ ************* Subtract layer 126 at Julian day = 35566.569 NIT = 20737  IZMIN =2 *************
+
+ ************* Subtract layer 127 at Julian day = 35566.570 NIT = 20744  IZMIN =2 *************
+
+ ************* Subtract layer 128 at Julian day = 35566.570 NIT = 20750  IZMIN =2 *************
+
+ ************* Subtract layer 129 at Julian day = 35566.570 NIT = 20756  IZMIN =2 *************
+
+ ************* Subtract layer 130 at Julian day = 35566.570 NIT = 20762  IZMIN =2 *************
+
+                  Subtract segments 2 through 2
+
+                  Subtract segments 34 through 34
+
+ *************    Add layer 130 at Julian day = 35566.570   NIT = 20763  IZMIN =3*************
+
+                  Add segments 2 through 2
+
+                  Add segments 34 through 34
+
+ *************    Add layer 129 at Julian day = 35566.570   NIT = 20763  IZMIN =3*************
+
+ *************    Add layer 128 at Julian day = 35566.570   NIT = 20763  IZMIN =3*************
+
+ *************    Add layer 127 at Julian day = 35566.570   NIT = 20763  IZMIN =3*************
+
+ *************    Add layer 126 at Julian day = 35566.570   NIT = 20763  IZMIN =3*************
+
+ *************    Add layer 125 at Julian day = 35566.570   NIT = 20763  IZMIN =3*************
+
+ ************* Subtract layer 125 at Julian day = 35566.570 NIT = 20779  IZMIN =3 *************
+
+ ************* Subtract layer 126 at Julian day = 35566.570 NIT = 20785  IZMIN =3 *************
+
+ *************    Add layer 126 at Julian day = 35566.571   NIT = 20797  IZMIN =3*************
+
+ *************    Add layer 125 at Julian day = 35566.571   NIT = 20799  IZMIN =3*************
+
+ *************    Add layer 124 at Julian day = 35566.571   NIT = 20800  IZMIN =3*************
+
+ *************    Add layer 123 at Julian day = 35566.571   NIT = 20802  IZMIN =3*************
+
+ *************    Add layer 122 at Julian day = 35566.572   NIT = 20806  IZMIN =4*************
+
+ ************* Subtract layer 122 at Julian day = 35566.574 NIT = 20815  IZMIN =3 *************
+
+ *************    Add layer 122 at Julian day = 35566.583   NIT = 20864  IZMIN =2*************
+
+ ************* Subtract layer 122 at Julian day = 35566.585 NIT = 20871  IZMIN =2 *************
+
+ ************* Subtract layer 123 at Julian day = 35566.587 NIT = 20879  IZMIN =2 *************
+
+ ************* Subtract layer 124 at Julian day = 35566.590 NIT = 20900  IZMIN =2 *************
+
+ ************* Subtract layer 125 at Julian day = 35566.594 NIT = 20929  IZMIN =2 *************
+
+ ************* Subtract layer 126 at Julian day = 35566.595 NIT = 20937  IZMIN =2 *************
+
+ ************* Subtract layer 127 at Julian day = 35566.595 NIT = 20944  IZMIN =2 *************
+
+ ************* Subtract layer 128 at Julian day = 35566.595 NIT = 20950  IZMIN =2 *************
+
+ ************* Subtract layer 129 at Julian day = 35566.595 NIT = 20956  IZMIN =2 *************
+
+ ************* Subtract layer 130 at Julian day = 35566.596 NIT = 20962  IZMIN =2 *************
+
+                  Subtract segments 2 through 2
+
+                  Subtract segments 34 through 34
+
+ *************    Add layer 130 at Julian day = 35566.596   NIT = 20963  IZMIN =3*************
+
+                  Add segments 2 through 2
+
+                  Add segments 34 through 34
+
+ *************    Add layer 129 at Julian day = 35566.596   NIT = 20963  IZMIN =3*************
+
+ *************    Add layer 128 at Julian day = 35566.596   NIT = 20963  IZMIN =3*************
+
+ *************    Add layer 127 at Julian day = 35566.596   NIT = 20963  IZMIN =3*************
+
+ *************    Add layer 126 at Julian day = 35566.596   NIT = 20963  IZMIN =3*************
+
+ *************    Add layer 125 at Julian day = 35566.596   NIT = 20963  IZMIN =3*************
+
+ *************    Add layer 124 at Julian day = 35566.596   NIT = 20963  IZMIN =3*************
+
+ ************* Subtract layer 124 at Julian day = 35566.596 NIT = 20973  IZMIN =3 *************
+
+ ************* Subtract layer 125 at Julian day = 35566.596 NIT = 20982  IZMIN =3 *************
+
+ *************    Add layer 125 at Julian day = 35566.596   NIT = 20996  IZMIN =3*************
+
+ *************    Add layer 124 at Julian day = 35566.596   NIT = 20998  IZMIN =3*************
+
+ *************    Add layer 123 at Julian day = 35566.597   NIT = 21000  IZMIN =3*************
+
+ *************    Add layer 122 at Julian day = 35566.597   NIT = 21001  IZMIN =3*************
+
+ ************* Subtract layer 122 at Julian day = 35566.602 NIT = 21020  IZMIN =2 *************
+
+ ************* Subtract layer 123 at Julian day = 35566.605 NIT = 21040  IZMIN =2 *************
+
+ *************    Add layer 123 at Julian day = 35566.609   NIT = 21063  IZMIN =2*************
+
+ ************* Subtract layer 123 at Julian day = 35566.613 NIT = 21085  IZMIN =2 *************
+
+ ************* Subtract layer 124 at Julian day = 35566.617 NIT = 21104  IZMIN =2 *************
+
+ ************* Subtract layer 125 at Julian day = 35566.618 NIT = 21113  IZMIN =2 *************
+
+ ************* Subtract layer 126 at Julian day = 35566.618 NIT = 21120  IZMIN =2 *************
+
+ ************* Subtract layer 127 at Julian day = 35566.619 NIT = 21127  IZMIN =2 *************
+
+ ************* Subtract layer 128 at Julian day = 35566.619 NIT = 21133  IZMIN =2 *************
+
+ ************* Subtract layer 129 at Julian day = 35566.619 NIT = 21139  IZMIN =2 *************
+
+ ************* Subtract layer 130 at Julian day = 35566.619 NIT = 21145  IZMIN =2 *************
+
+                  Subtract segments 2 through 2
+
+                  Subtract segments 34 through 34
+
+ *************    Add layer 130 at Julian day = 35566.619   NIT = 21146  IZMIN =3*************
+
+                  Add segments 2 through 2
+
+                  Add segments 34 through 34
+
+ *************    Add layer 129 at Julian day = 35566.619   NIT = 21146  IZMIN =3*************
+
+ *************    Add layer 128 at Julian day = 35566.619   NIT = 21146  IZMIN =3*************
+
+ *************    Add layer 127 at Julian day = 35566.619   NIT = 21146  IZMIN =3*************
+
+ *************    Add layer 126 at Julian day = 35566.619   NIT = 21146  IZMIN =3*************
+
+ *************    Add layer 125 at Julian day = 35566.619   NIT = 21146  IZMIN =3*************
+
+ *************    Add layer 124 at Julian day = 35566.619   NIT = 21146  IZMIN =3*************
+
+ ************* Subtract layer 124 at Julian day = 35566.619 NIT = 21158  IZMIN =3 *************
+
+ ************* Subtract layer 125 at Julian day = 35566.619 NIT = 21166  IZMIN =3 *************
+
+ *************    Add layer 125 at Julian day = 35566.620   NIT = 21180  IZMIN =3*************
+
+ *************    Add layer 124 at Julian day = 35566.620   NIT = 21181  IZMIN =3*************
+
+ *************    Add layer 123 at Julian day = 35566.620   NIT = 21183  IZMIN =3*************
+
+ *************    Add layer 122 at Julian day = 35566.620   NIT = 21185  IZMIN =4*************
+
+ ************* Subtract layer 122 at Julian day = 35566.625 NIT = 21203  IZMIN =2 *************
+
+ ************* Subtract layer 123 at Julian day = 35566.629 NIT = 21227  IZMIN =2 *************
+
+ ************* Subtract layer 124 at Julian day = 35566.635 NIT = 21262  IZMIN =2 *************
+
+ ************* Subtract layer 125 at Julian day = 35566.636 NIT = 21271  IZMIN =2 *************
+
+ ************* Subtract layer 126 at Julian day = 35566.637 NIT = 21278  IZMIN =2 *************
+
+ ************* Subtract layer 127 at Julian day = 35566.637 NIT = 21285  IZMIN =2 *************
+
+ ************* Subtract layer 128 at Julian day = 35566.637 NIT = 21291  IZMIN =2 *************
+
+ ************* Subtract layer 129 at Julian day = 35566.637 NIT = 21297  IZMIN =2 *************
+
+ ************* Subtract layer 130 at Julian day = 35566.637 NIT = 21303  IZMIN =2 *************
+
+                  Subtract segments 2 through 2
+
+                  Subtract segments 34 through 34
+
+ *************    Add layer 130 at Julian day = 35566.637   NIT = 21304  IZMIN =3*************
+
+                  Add segments 2 through 2
+
+                  Add segments 34 through 34
+
+ *************    Add layer 129 at Julian day = 35566.637   NIT = 21304  IZMIN =3*************
+
+ *************    Add layer 128 at Julian day = 35566.637   NIT = 21304  IZMIN =3*************
+
+ *************    Add layer 127 at Julian day = 35566.637   NIT = 21304  IZMIN =3*************
+
+ *************    Add layer 126 at Julian day = 35566.637   NIT = 21304  IZMIN =3*************
+
+ *************    Add layer 125 at Julian day = 35566.637   NIT = 21304  IZMIN =3*************
+
+ *************    Add layer 124 at Julian day = 35566.637   NIT = 21304  IZMIN =3*************
+
+ *************    Add layer 123 at Julian day = 35566.637   NIT = 21304  IZMIN =3*************
+
+ ************* Subtract layer 123 at Julian day = 35566.637 NIT = 21313  IZMIN =3 *************
+
+ ************* Subtract layer 124 at Julian day = 35566.637 NIT = 21322  IZMIN =3 *************
+
+ ************* Subtract layer 125 at Julian day = 35566.638 NIT = 21330  IZMIN =3 *************
+
+ *************    Add layer 125 at Julian day = 35566.638   NIT = 21336  IZMIN =3*************
+
+ *************    Add layer 124 at Julian day = 35566.638   NIT = 21338  IZMIN =3*************
+
+ *************    Add layer 123 at Julian day = 35566.638   NIT = 21340  IZMIN =3*************
+
+ *************    Add layer 122 at Julian day = 35566.639   NIT = 21342  IZMIN =4*************
+
+ *************    Add layer 121 at Julian day = 35566.640   NIT = 21349  IZMIN =5*************
+
+ ************* Subtract layer 121 at Julian day = 35566.641 NIT = 21352  IZMIN =3 *************
+
+ *************    Add layer 121 at Julian day = 35566.649   NIT = 21398  IZMIN =3*************
+
+ ************* Subtract layer 121 at Julian day = 35566.653 NIT = 21412  IZMIN =3 *************
+
+ ************* Subtract layer 122 at Julian day = 35566.655 NIT = 21420  IZMIN =2 *************
+
+ ************* Subtract layer 123 at Julian day = 35566.659 NIT = 21439  IZMIN =2 *************
+
+ ************* Subtract layer 124 at Julian day = 35566.664 NIT = 21468  IZMIN =2 *************
+
+ ************* Subtract layer 125 at Julian day = 35566.665 NIT = 21477  IZMIN =2 *************
+
+ ************* Subtract layer 126 at Julian day = 35566.666 NIT = 21484  IZMIN =2 *************
+
+ ************* Subtract layer 127 at Julian day = 35566.666 NIT = 21491  IZMIN =2 *************
+
+ ************* Subtract layer 128 at Julian day = 35566.666 NIT = 21497  IZMIN =2 *************
+
+ ************* Subtract layer 129 at Julian day = 35566.666 NIT = 21503  IZMIN =2 *************
+
+ ************* Subtract layer 130 at Julian day = 35566.666 NIT = 21509  IZMIN =2 *************
+
+                  Subtract segments 2 through 2
+
+                  Subtract segments 34 through 34
+
+ *************    Add layer 130 at Julian day = 35566.666   NIT = 21510  IZMIN =3*************
+
+                  Add segments 2 through 2
+
+                  Add segments 34 through 34
+
+ *************    Add layer 129 at Julian day = 35566.666   NIT = 21510  IZMIN =3*************
+
+ *************    Add layer 128 at Julian day = 35566.666   NIT = 21510  IZMIN =3*************
+
+ *************    Add layer 127 at Julian day = 35566.666   NIT = 21510  IZMIN =3*************
+
+ *************    Add layer 126 at Julian day = 35566.666   NIT = 21510  IZMIN =3*************
+
+ *************    Add layer 125 at Julian day = 35566.666   NIT = 21510  IZMIN =3*************
+
+ *************    Add layer 124 at Julian day = 35566.666   NIT = 21510  IZMIN =3*************
+
+ ************* Subtract layer 124 at Julian day = 35566.666 NIT = 21527  IZMIN =3 *************
+
+ ************* Subtract layer 125 at Julian day = 35566.667 NIT = 21534  IZMIN =3 *************
+
+ *************    Add layer 125 at Julian day = 35566.667   NIT = 21542  IZMIN =3*************
+
+ *************    Add layer 124 at Julian day = 35566.667   NIT = 21545  IZMIN =3*************
+
+ *************    Add layer 123 at Julian day = 35566.667   NIT = 21546  IZMIN =3*************
+
+ *************    Add layer 122 at Julian day = 35566.667   NIT = 21548  IZMIN =3*************
+
+ *************    Add layer 121 at Julian day = 35566.668   NIT = 21553  IZMIN =5*************
+
+ ************* Subtract layer 121 at Julian day = 35566.672 NIT = 21565  IZMIN =2 *************
+
+ *************    Add layer 121 at Julian day = 35566.687   NIT = 21639  IZMIN =3*************
+
+ ************* Subtract layer 121 at Julian day = 35566.689 NIT = 21646  IZMIN =2 *************
+
+ ************* Subtract layer 122 at Julian day = 35566.692 NIT = 21655  IZMIN =2 *************
+
+ *************    Add layer 122 at Julian day = 35566.695   NIT = 21670  IZMIN =2*************
+
+ ************* Subtract layer 122 at Julian day = 35566.698 NIT = 21683  IZMIN =2 *************
+
+ *************    Add layer 122 at Julian day = 35566.702   NIT = 21704  IZMIN =2*************
+
+ ************* Subtract layer 122 at Julian day = 35566.705 NIT = 21718  IZMIN =2 *************
+
+ *************    Add layer 122 at Julian day = 35566.712   NIT = 21751  IZMIN =2*************
+
+ ************* Subtract layer 122 at Julian day = 35566.714 NIT = 21762  IZMIN =2 *************
+
+ *************    Add layer 122 at Julian day = 35566.718   NIT = 21782  IZMIN =2*************
+
+ ************* Subtract layer 122 at Julian day = 35566.722 NIT = 21797  IZMIN =2 *************
+
+ *************    Add layer 122 at Julian day = 35566.727   NIT = 21822  IZMIN =2*************
+
+ ************* Subtract layer 122 at Julian day = 35566.730 NIT = 21837  IZMIN =2 *************
+
+ *************    Add layer 122 at Julian day = 35566.736   NIT = 21863  IZMIN =2*************
+
+ ************* Subtract layer 122 at Julian day = 35566.740 NIT = 21880  IZMIN =2 *************
+
+ *************    Add layer 122 at Julian day = 35566.746   NIT = 21910  IZMIN =2*************
+
+ ************* Subtract layer 122 at Julian day = 35566.750 NIT = 21925  IZMIN =2 *************
+
+ *************    Add layer 122 at Julian day = 35566.756   NIT = 21955  IZMIN =2*************
+
+ ************* Subtract layer 122 at Julian day = 35566.760 NIT = 21973  IZMIN =2 *************
+
+ *************    Add layer 122 at Julian day = 35566.768   NIT = 22011  IZMIN =2*************
+
+ ************* Subtract layer 122 at Julian day = 35566.773 NIT = 22030  IZMIN =2 *************
+
+ *************    Add layer 122 at Julian day = 35566.779   NIT = 22058  IZMIN =2*************
+
+ ************* Subtract layer 122 at Julian day = 35566.784 NIT = 22077  IZMIN =2 *************
+
+ *************    Add layer 122 at Julian day = 35566.790   NIT = 22104  IZMIN =2*************
+
+ ************* Subtract layer 122 at Julian day = 35566.795 NIT = 22124  IZMIN =2 *************
+
+ *************    Add layer 122 at Julian day = 35566.803   NIT = 22163  IZMIN =2*************
+
+ ************* Subtract layer 122 at Julian day = 35566.810 NIT = 22190  IZMIN =2 *************
+
+ *************    Add layer 122 at Julian day = 35566.822   NIT = 22242  IZMIN =2*************
+
+ ************* Subtract layer 122 at Julian day = 35566.831 NIT = 22275  IZMIN =2 *************
+
+ ************* Subtract layer 123 at Julian day = 35566.844 NIT = 22354  IZMIN =2 *************
+
+ ************* Subtract layer 124 at Julian day = 35566.848 NIT = 22376  IZMIN =2 *************
+
+ ************* Subtract layer 125 at Julian day = 35566.849 NIT = 22385  IZMIN =2 *************
+
+ ************* Subtract layer 126 at Julian day = 35566.849 NIT = 22392  IZMIN =2 *************
+
+ ************* Subtract layer 127 at Julian day = 35566.849 NIT = 22399  IZMIN =2 *************
+
+ ************* Subtract layer 128 at Julian day = 35566.849 NIT = 22405  IZMIN =2 *************
+
+ ************* Subtract layer 129 at Julian day = 35566.850 NIT = 22411  IZMIN =2 *************
+
+ ************* Subtract layer 130 at Julian day = 35566.850 NIT = 22417  IZMIN =2 *************
+
+                  Subtract segments 2 through 2
+
+                  Subtract segments 34 through 34
+
+ *************    Add layer 130 at Julian day = 35566.850   NIT = 22418  IZMIN =3*************
+
+                  Add segments 2 through 2
+
+                  Add segments 34 through 34
+
+ *************    Add layer 129 at Julian day = 35566.850   NIT = 22418  IZMIN =3*************
+
+ *************    Add layer 128 at Julian day = 35566.850   NIT = 22418  IZMIN =3*************
+
+ *************    Add layer 127 at Julian day = 35566.850   NIT = 22418  IZMIN =3*************
+
+ *************    Add layer 126 at Julian day = 35566.850   NIT = 22418  IZMIN =3*************
+
+ *************    Add layer 125 at Julian day = 35566.850   NIT = 22418  IZMIN =3*************
+
+ *************    Add layer 124 at Julian day = 35566.850   NIT = 22418  IZMIN =3*************
+
+ *************    Add layer 123 at Julian day = 35566.850   NIT = 22418  IZMIN =3*************
+
+ *************    Add layer 122 at Julian day = 35566.850   NIT = 22418  IZMIN =3*************
+
+ *************    Add layer 121 at Julian day = 35566.850   NIT = 22418  IZMIN =3*************
+
+ ************* Subtract layer 121 at Julian day = 35566.850 NIT = 22428  IZMIN =3 *************
+
+ ************* Subtract layer 122 at Julian day = 35566.850 NIT = 22438  IZMIN =3 *************
+
+ *************    Add layer 122 at Julian day = 35566.851   NIT = 22453  IZMIN =3*************
+
+ *************    Add layer 121 at Julian day = 35566.851   NIT = 22455  IZMIN =3*************
+
+ *************    Add layer 120 at Julian day = 35566.852   NIT = 22461  IZMIN =5*************
+
+ ************* Subtract layer 120 at Julian day = 35566.854 NIT = 22470  IZMIN =2 *************
+
+ ************* Subtract layer 121 at Julian day = 35566.858 NIT = 22481  IZMIN =2 *************
+
+ ************* Subtract layer 122 at Julian day = 35566.863 NIT = 22502  IZMIN =2 *************
+
+ ************* Subtract layer 123 at Julian day = 35566.867 NIT = 22520  IZMIN =2 *************
+
+ ************* Subtract layer 124 at Julian day = 35566.869 NIT = 22534  IZMIN =2 *************
+
+ ************* Subtract layer 125 at Julian day = 35566.869 NIT = 22543  IZMIN =2 *************
+
+ ************* Subtract layer 126 at Julian day = 35566.870 NIT = 22550  IZMIN =2 *************
+
+ ************* Subtract layer 127 at Julian day = 35566.870 NIT = 22557  IZMIN =2 *************
+
+ ************* Subtract layer 128 at Julian day = 35566.870 NIT = 22563  IZMIN =2 *************
+
+ ************* Subtract layer 129 at Julian day = 35566.870 NIT = 22569  IZMIN =2 *************
+
+ ************* Subtract layer 130 at Julian day = 35566.870 NIT = 22575  IZMIN =2 *************
+
+                  Subtract segments 2 through 2
+
+                  Subtract segments 34 through 34
+
+ *************    Add layer 130 at Julian day = 35566.870   NIT = 22576  IZMIN =3*************
+
+                  Add segments 2 through 2
+
+                  Add segments 34 through 34
+
+ *************    Add layer 129 at Julian day = 35566.870   NIT = 22576  IZMIN =3*************
+
+ *************    Add layer 128 at Julian day = 35566.870   NIT = 22576  IZMIN =3*************
+
+ *************    Add layer 127 at Julian day = 35566.870   NIT = 22576  IZMIN =3*************
+
+ *************    Add layer 126 at Julian day = 35566.870   NIT = 22576  IZMIN =3*************
+
+ *************    Add layer 125 at Julian day = 35566.870   NIT = 22576  IZMIN =3*************
+
+ *************    Add layer 124 at Julian day = 35566.870   NIT = 22576  IZMIN =3*************
+
+ *************    Add layer 123 at Julian day = 35566.870   NIT = 22576  IZMIN =3*************
+
+ *************    Add layer 122 at Julian day = 35566.870   NIT = 22576  IZMIN =3*************
+
+ ************* Subtract layer 122 at Julian day = 35566.870 NIT = 22594  IZMIN =3 *************
+
+ ************* Subtract layer 123 at Julian day = 35566.871 NIT = 22603  IZMIN =3 *************
+
+ *************    Add layer 123 at Julian day = 35566.871   NIT = 22609  IZMIN =3*************
+
+ *************    Add layer 122 at Julian day = 35566.871   NIT = 22611  IZMIN =3*************
+
+ *************    Add layer 121 at Julian day = 35566.871   NIT = 22613  IZMIN =3*************
+
+ *************    Add layer 120 at Julian day = 35566.872   NIT = 22618  IZMIN =4*************
+
+ ************* Subtract layer 120 at Julian day = 35566.876 NIT = 22630  IZMIN =2 *************
+
+ ************* Subtract layer 121 at Julian day = 35566.881 NIT = 22646  IZMIN =2 *************
+
+ ************* Subtract layer 122 at Julian day = 35566.890 NIT = 22678  IZMIN =2 *************
+
+ ************* Subtract layer 123 at Julian day = 35566.894 NIT = 22702  IZMIN =2 *************
+
+ ************* Subtract layer 124 at Julian day = 35566.896 NIT = 22715  IZMIN =2 *************
+
+ ************* Subtract layer 125 at Julian day = 35566.896 NIT = 22724  IZMIN =2 *************
+
+ ************* Subtract layer 126 at Julian day = 35566.897 NIT = 22731  IZMIN =2 *************
+
+ ************* Subtract layer 127 at Julian day = 35566.897 NIT = 22738  IZMIN =2 *************
+
+ ************* Subtract layer 128 at Julian day = 35566.897 NIT = 22744  IZMIN =2 *************
+
+ ************* Subtract layer 129 at Julian day = 35566.897 NIT = 22750  IZMIN =2 *************
+
+ ************* Subtract layer 130 at Julian day = 35566.897 NIT = 22756  IZMIN =2 *************
+
+                  Subtract segments 2 through 2
+
+                  Subtract segments 34 through 34
+
+ *************    Add layer 130 at Julian day = 35566.897   NIT = 22757  IZMIN =3*************
+
+                  Add segments 2 through 2
+
+                  Add segments 34 through 34
+
+ *************    Add layer 129 at Julian day = 35566.897   NIT = 22757  IZMIN =3*************
+
+ *************    Add layer 128 at Julian day = 35566.897   NIT = 22757  IZMIN =3*************
+
+ *************    Add layer 127 at Julian day = 35566.897   NIT = 22757  IZMIN =3*************
+
+ *************    Add layer 126 at Julian day = 35566.897   NIT = 22757  IZMIN =3*************
+
+ *************    Add layer 125 at Julian day = 35566.897   NIT = 22757  IZMIN =3*************
+
+ *************    Add layer 124 at Julian day = 35566.897   NIT = 22757  IZMIN =3*************
+
+ *************    Add layer 123 at Julian day = 35566.897   NIT = 22757  IZMIN =3*************
+
+ *************    Add layer 122 at Julian day = 35566.897   NIT = 22757  IZMIN =3*************
+
+ *************    Add layer 121 at Julian day = 35566.897   NIT = 22757  IZMIN =3*************
+
+ ************* Subtract layer 121 at Julian day = 35566.897 NIT = 22767  IZMIN =3 *************
+
+ ************* Subtract layer 122 at Julian day = 35566.897 NIT = 22777  IZMIN =3 *************
+
+ *************    Add layer 122 at Julian day = 35566.898   NIT = 22792  IZMIN =3*************
+
+ *************    Add layer 121 at Julian day = 35566.898   NIT = 22794  IZMIN =3*************
+
+ *************    Add layer 120 at Julian day = 35566.899   NIT = 22799  IZMIN =4*************
+
+ ************* Subtract layer 120 at Julian day = 35566.903 NIT = 22811  IZMIN =2 *************
+
+ ************* Subtract layer 121 at Julian day = 35566.915 NIT = 22856  IZMIN =2 *************
+
+ *************    Add layer 121 at Julian day = 35566.941   NIT = 22926  IZMIN =2*************
+
+ *************    Add layer 120 at Julian day = 35566.999   NIT = 23082  IZMIN =2*************
+
+ *************    Add layer 119 at Julian day = 35567.143   NIT = 23349  IZMIN =2*************
+
+ *************    Add layer 118 at Julian day = 35567.288   NIT = 23562  IZMIN =2*************
+
+ *************    Add layer 117 at Julian day = 35567.452   NIT = 23774  IZMIN =2*************
+
+ *************    Add layer 116 at Julian day = 35567.629   NIT = 23976  IZMIN =2*************
+
+ *************    Add layer 115 at Julian day = 35567.818   NIT = 24167  IZMIN =2*************
+
+ *************    Add layer 114 at Julian day = 35568.016   NIT = 24345  IZMIN =2*************
+
+ *************    Add layer 113 at Julian day = 35568.233   NIT = 24520  IZMIN =2*************
+
+ *************    Add layer 112 at Julian day = 35568.488   NIT = 24703  IZMIN =2*************
+
+ *************    Add layer 111 at Julian day = 35568.802   NIT = 24909  IZMIN =2*************
+
+ *************    Add layer 110 at Julian day = 35569.236   NIT = 25176  IZMIN =2*************

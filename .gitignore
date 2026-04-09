@@ -1,3 +1,7 @@
+# Test data
+*.opt
+w2.err
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

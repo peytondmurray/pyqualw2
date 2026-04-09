@@ -1,3 +1,4 @@
+import datetime
 import re
 import warnings
 from abc import ABC, abstractmethod
@@ -9,6 +10,8 @@ from pathlib import Path
 from typing import ClassVar, Self
 
 import pandas as pd
+
+JULIAN_REFERENCE_START = datetime.datetime(1921, 1, 1)
 
 
 class BaseInput(ABC):
@@ -519,11 +522,15 @@ class W2ConSimpleInput(BaseInput):
 
     Note that this class does not parse the entire file - it only allows users to read
     and modify TMSTRT, TMEND, and YEAR values.
+
+    time_lineno = line of W2_con.csv that contains TMSTART, TMEND and YEAR
+    nwb_lineno = line of W2_Con.csv that contains NWB, NBR, IMX, KMX, NPROC, CLOSEC
     """
 
     filename: PathLike | str
     content: str
     time_lineno: int
+    nwb_lineno: int
 
     @classmethod
     def from_file(cls, filename: PathLike | str) -> Self:
@@ -545,15 +552,25 @@ class W2ConSimpleInput(BaseInput):
         with open(filename) as f:
             lines = f.readlines()
 
+        time_lineno = None
+        nwb_lineno = None
+
         for i, line in enumerate(lines):
             if line.startswith("TMSTRT"):
-                return cls(
-                    filename=filename,
-                    content="".join(lines),
-                    time_lineno=i + 1,
-                )
+                time_lineno = i + 1
+            if line.startswith("NWB"):
+                nwb_lineno = i + 1
 
-        raise ValueError(f"Unable to find the time card in {filename}")
+        if nwb_lineno is None or time_lineno is None:
+            raise ValueError("W2_con.csv is malformed")
+
+        # This method will parse through the entire file
+        return cls(
+            filename=filename,
+            content="".join(lines),
+            time_lineno=time_lineno,
+            nwb_lineno=nwb_lineno,
+        )
 
     def to_file(
         self,
@@ -579,6 +596,20 @@ class W2ConSimpleInput(BaseInput):
         _create_parents_or_fail(path, overwrite, create_parents)
         with open(path, "w") as f:
             f.write(self.content)
+
+    @property
+    def branchdata(self) -> int:
+        """Get the number of Branches for the configuration.
+
+        Returns
+        -------
+        int
+            nwb = number of water bodes
+            nbr = number of branches
+        """
+        lines = self.content.splitlines(keepends=True)
+        _nwb, nbr, *_rest = lines[self.nwb_lineno].split(",")
+        return int(nbr)
 
     @property
     def timedata(self) -> tuple[float, float, int]:
@@ -610,11 +641,278 @@ class W2ConSimpleInput(BaseInput):
 
 
 @dataclass
+class TempDataInput(BaseInput):
+    """A simple parser for the inflow temperature data input to QualW2.
+
+    data : Dataframe | float
+        Pandas dataframe holding the inflow temperature data
+
+    filename : PathLike | str
+        Path to inflow temperature data file
+    """
+
+    data: pd.DataFrame
+    filename: PathLike | str | None = None
+
+    @classmethod
+    def from_file(cls, filename: PathLike | str) -> Self:
+        """Select and Parse inflow temperature input file from database.
+
+        Parameters
+        ----------
+        filename : PathLike | str
+            Path to inflow temperature data file
+        """
+        if Path(filename).suffix != ".csv":
+            raise NotImplementedError
+
+        return cls(
+            filename=filename,
+            data=pd.read_csv(filename),
+        )
+
+    def to_file(
+        self,
+        filename: PathLike | str = "mtin_br.csv",
+        overwrite: bool = False,
+        create_parents: bool = False,
+    ):
+        """Write the temp data to a csv file.
+
+        Parameters
+        ----------
+        filename : PathLike | str
+            Path where the data should be written
+        overwrite : bool
+            If True, overwrite an existing file
+        create_parents : bool
+            If True, create any necessary parent directories
+        number_of_branches : int
+            Detirmines number of inflow temperature input files to generate
+        """
+        path = Path(filename)
+        if path.suffix != ".csv":
+            raise NotImplementedError
+
+        _create_parents_or_fail(path, overwrite, create_parents)
+
+        # CONVERT first column from date to julian day (int) using
+        # JULIAN_REFERENCE_START
+
+        working_data = self.data.iloc[:, 0:2].copy()
+        working_data["Date"] = pd.to_datetime(working_data["Date"])
+
+        working_data["Date"] = (working_data["Date"] - JULIAN_REFERENCE_START).dt.days
+
+        # This pedantic formatting is required
+        # by the current windows binaries for CeQual-W2
+
+        buf = StringIO()
+        buf.write("$\n\n")
+        working_data.to_csv(buf, index=False)
+
+        with open(filename, "w", encoding="utf-8", newline="") as file:
+            file.write(buf.getvalue())
+
+
+@dataclass
+class FlowDataInput(BaseInput):
+    """A simple parser for the inflow flow data input to QualW2."""
+
+    data: pd.DataFrame
+    filename: PathLike | str | None = None
+    evaporation_column_name: str = "MIL_EVAP"
+
+    @classmethod
+    def from_file(cls, filename: PathLike | str) -> Self:
+        """Select and parse inflow flow input file from database.
+
+        Parameters
+        ----------
+        filename : PathLike | str
+            Path to inflow flow data file
+
+        Returns
+        -------
+        Self
+            An object wrapping the selected year's flow data input.
+        """
+        if Path(filename).suffix != ".csv":
+            raise NotImplementedError
+
+        return cls(
+            filename=filename,
+            data=pd.read_csv(filename),
+        )
+
+    def to_file(
+        self,
+        filename: PathLike | str = "mqin_br.csv",
+        overwrite: bool = False,
+        create_parents: bool = False,
+        zero_flow: bool = False,
+        date_column_name: str = "Date",
+        inflow_column_name: str = "M_IN",
+    ):
+        """Write the flow data to a csv file.
+
+        Parameters
+        ----------
+        filename : PathLike | str
+            Path where the data should be written
+        overwrite : bool
+            If True, overwrite an existing file
+        create_parents : bool
+            If True, create any necessary parent directories
+        zero_flow : bool
+            If True, set the inflow flow to 0
+        date_column_name : str
+            The name of the date column to write to the file
+        inflow_column_name : str
+            The name of the inflow column to write to the file
+        """
+        path = Path(filename)
+        if path.suffix != ".csv":
+            raise NotImplementedError
+
+        _create_parents_or_fail(path, overwrite, create_parents)
+
+        working_data = self.data[[date_column_name, inflow_column_name]].copy()
+
+        if zero_flow:
+            working_data[inflow_column_name] = 0
+
+        working_data[date_column_name] = pd.to_datetime(working_data[date_column_name])
+
+        working_data[date_column_name] = (
+            working_data[date_column_name] - JULIAN_REFERENCE_START
+        ).dt.days
+        buf = StringIO()
+        buf.write("$\n\n")
+        working_data.to_csv(buf, index=False)
+
+        # This pedantic formatting is required by the
+        # current windows binaries for CeQual-W2
+
+        with open(filename, "w", encoding="utf-8", newline="") as file:
+            file.write(buf.getvalue())
+
+    def to_evap_csv_file(
+        self,
+        filename: PathLike | str = "mqdt_br.csv",
+        overwrite: bool = False,
+        create_parents: bool = False,
+        date_column_name: str = "Date",
+        evaporation_column_name: str = "MIL_EVAP",
+    ):
+        """Write the evaporation data to a csv file.
+
+        Parameters
+        ----------
+        filename : PathLike | str
+            Path where the evaporation data should be written
+        overwrite : bool
+            If True, overwrite an existing file
+        create_parents : bool
+            If True, create any necessary parent directories
+        date_column_name : str
+            The name of the date column to write to the file
+        evaporation_column_name : str
+            The name of the evaporation column to write to the file
+        """
+        path = Path(filename)
+        if path.suffix != ".csv":
+            raise NotImplementedError
+
+        _create_parents_or_fail(path, overwrite, create_parents)
+
+        working_data = self.data[[date_column_name, evaporation_column_name]].copy()
+
+        working_data[date_column_name] = pd.to_datetime(working_data[date_column_name])
+
+        working_data[date_column_name] = (
+            working_data[date_column_name] - JULIAN_REFERENCE_START
+        ).dt.days
+        buf = StringIO()
+        buf.write("$\n\n")
+        working_data.to_csv(buf, index=False)
+
+        # This pedantic formatting is required by the
+        # current windows binaries for CeQual-W2
+
+        with open(filename, "w", encoding="utf-8", newline="") as file:
+            file.write(buf.getvalue())
+
+    def to_outflow_csv_file(
+        self,
+        filename: PathLike | str = "mqot_br.csv",
+        overwrite: bool = False,
+        create_parents: bool = False,
+        outflow_column_names: list[str] | None = None,
+        date_column_name: str = "Date",
+    ) -> None:
+        """Write the outflow data to a csv file.
+
+        Parameters
+        ----------
+        filename : PathLike | str
+            Path where the outflow data should be written
+        overwrite : bool
+            If True, overwrite an existing file
+        create_parents : bool
+            If True, create any necessary parent directories
+        outflow_column_names : list[str] | None
+            The names of the outflow columns to write to the file
+        date_column_name : str
+            The name of the date column to write to the file
+        """
+        if outflow_column_names is None:
+            outflow_column_names = ["SPL_OUT", "FKC_OUT", "MC_OUT", "SJR_OUT"]
+
+        path = Path(filename)
+        if path.suffix != ".csv":
+            raise NotImplementedError
+
+        _create_parents_or_fail(path, overwrite, create_parents)
+
+        working_data = self.data[[date_column_name] + outflow_column_names].copy()
+
+        working_data[date_column_name] = pd.to_datetime(working_data[date_column_name])
+
+        working_data[date_column_name] = (
+            working_data[date_column_name] - JULIAN_REFERENCE_START
+        ).dt.days
+
+        # This pedantic formatting is required by the
+        # current windows binaries for CeQual-W2
+
+        buf = StringIO()
+        buf.write("$\n\n")
+        working_data.to_csv(buf, index=False)
+
+        with open(filename, "w", encoding="utf-8", newline="") as file:
+            file.write(buf.getvalue())
+
+
+@dataclass
 class MetDataInput(BaseInput):
     """A simple parser for the met data input to QualW2."""
 
-    met_data: pd.DataFrame
+    data: pd.DataFrame
     filename: PathLike | str | None = None
+
+    def set_false_julian_day(self, sim_start: float):
+        """Set the false julian day for the met data.
+
+        Parameters
+        ----------
+        sim_start : int
+            The start of the simulation in days since JULIAN_REFERENCE_START
+        """
+        sim_date = JULIAN_REFERENCE_START + datetime.timedelta(sim_start)
+        sim_year = sim_date.year
+
+        self.data["date"] = self.data["date"] + pd.offsets.DateOffset(year=sim_year)
 
     @classmethod
     def from_file(cls, filename: PathLike | str) -> Self:
@@ -633,11 +931,13 @@ class MetDataInput(BaseInput):
         if Path(filename).suffix != ".csv":
             raise NotImplementedError
 
+        df = pd.read_csv(filename)
+        df["date"] = pd.to_datetime(df.iloc[:, 0])
+        df = df[["date"] + df.columns[1:-1].to_list()]
+
         return cls(
             filename=filename,
-            met_data=pd.read_csv(
-                filename, parse_dates=True, date_format="%d:%m:%Y %H:%M"
-            ),
+            data=df,
         )
 
     def to_file(
@@ -663,18 +963,18 @@ class MetDataInput(BaseInput):
 
         _create_parents_or_fail(path, overwrite, create_parents)
 
-        self.met_data[self.met_data.columns[1:]].to_csv(filename, index=False)
+        # Removing the date column so that JDAY is the first column
+        working_data = self.data.iloc[:, 1:]
 
         # This pedantic formatting is required
         # by the current windows binaries for CeQual-W2
 
-        blank_lines_for_formatting = "$\n\n"
+        buf = StringIO()
+        buf.write("$\n\n")
+        working_data.to_csv(buf, index=False)
 
-        with open(filename) as file:
-            not_formatted = file.read()
-
-        with open(filename, "w") as file:
-            file.write(blank_lines_for_formatting + not_formatted)
+        with open(filename, "w", encoding="utf-8", newline="") as file:
+            file.write(buf.getvalue())
 
 
 def _create_parents_or_fail(
