@@ -1,4 +1,7 @@
+from pathlib import Path
+
 import numpy as np
+import pytest
 
 from pyqualw2.config.inputs import (
     BathymetryInput,
@@ -10,32 +13,32 @@ from pyqualw2.config.inputs import (
 )
 
 
-def test_read_met_data_from_file(sample_met):
+def test_read_met_data_from_file(sample_met_2018):
     """Test that a met_data df is generated from a met_data input file."""
-    met_data = MetDataInput.from_file(sample_met)
+    met_data = MetDataInput.from_file(sample_met_2018)
 
-    assert met_data.filename == sample_met
+    assert met_data.filename == sample_met_2018
     assert met_data.data.columns[1] == "JDAY"
 
 
-def test_set_false_julian_day(sample_met):
+def test_set_false_julian_day(sample_met_2018):
     """Test that the false julian day can be set for the met data."""
-    met_data = MetDataInput.from_file(sample_met)
+    met_data = MetDataInput.from_file(sample_met_2018)
     met_data.set_false_julian_day(400)
     assert met_data.data["date"].iloc[0].year == 1922
 
 
-def test_read_temp_data_from_file(sample_temp):
+def test_read_temp_data_from_file(sample_temp_2018):
     """Test that a temp_data df is generated from a temp_data input file."""
-    temp_data = TempDataInput.from_file(sample_temp)
-    assert temp_data.filename == sample_temp
+    temp_data = TempDataInput.from_file(sample_temp_2018)
+    assert temp_data.filename == sample_temp_2018
     assert temp_data.data.columns[0] == "Date"
 
 
-def test_read_flow_data_from_file(sample_flow):
+def test_read_flow_data_from_file(sample_flow_2018):
     """Test that a flow_data df is generated from a flow_data input file."""
-    flow_data = FlowDataInput.from_file(sample_flow)
-    assert flow_data.filename == sample_flow
+    flow_data = FlowDataInput.from_file(sample_flow_2018)
+    assert flow_data.filename == sample_flow_2018
     assert flow_data.data.columns[0] == "Date"
 
 
@@ -63,10 +66,17 @@ def test_modify_w2con_times(sample_w2_con):
     assert new_lines[w2con.time_lineno + 1 :] == lines[w2con.time_lineno + 1 :]
 
 
-def test_load_bathymetry(sample_bathymetry):
+@pytest.mark.parametrize(
+    "fname",
+    [
+        Path(__file__).parent / "sample_data1" / "inputs" / "mbth_wb1.csv",
+        Path(__file__).parent / "other_data" / "other_bathymetry.csv",
+    ],
+)
+def test_load_bathymetry(fname):
     """Test that Bathymetry.from_file can load data from a file."""
-    bathy = BathymetryInput.from_file(sample_bathymetry)
-    assert bathy.filename == sample_bathymetry
+    bathy = BathymetryInput.from_file(fname)
+    assert bathy.filename == fname
     np.testing.assert_equal(
         bathy.segment_data["DLX [m]"][0:3].to_numpy(), [0, 824.71, 824.71]
     )
@@ -80,6 +90,13 @@ def test_load_bathymetry(sample_bathymetry):
 
     # 48 segments and 212 layers
     assert bathy.data.shape == (212, 48)
+
+
+def check_bathymetry_files_identical():
+    """Test that the two slightly-different bathymetry files are parsed identically."""
+    fname1 = "sample_data1/inputs/mbth_wb1.csv"
+    fname2 = "other_data/other_bathymetry.csv"
+    assert BathymetryInput.from_file(fname1) == BathymetryInput.from_file(fname2)
 
 
 def test_load_profile(sample_profile):
@@ -105,28 +122,28 @@ def test_load_profile(sample_profile):
     np.testing.assert_equal(prof.data["DO mgl"].to_numpy()[1:4], [9.87, 9.94, 9.98])
 
 
-def test_write_met(sample_met, tmp_path):
+def test_write_met(sample_met_2018, tmp_path):
     """Test that writing bathymetry data to a file works as intended."""
     path = tmp_path / "test.csv"
-    met_data = MetDataInput.from_file(sample_met)
+    met_data = MetDataInput.from_file(sample_met_2018)
     met_data.to_file(path)
 
     assert path.is_file()
 
 
-def test_write_temp(sample_temp, tmp_path):
+def test_write_temp(sample_temp_2018, tmp_path):
     """Test that writing bathymetry data to a file works as intended."""
     path = tmp_path / "test.csv"
-    temp_df = TempDataInput.from_file(sample_temp)
+    temp_df = TempDataInput.from_file(sample_temp_2018)
     temp_df.to_file(path)
 
     assert path.is_file()
 
 
-def test_write_flow(sample_flow, tmp_path):
+def test_write_flow(sample_flow_2018, tmp_path):
     """Test that writing flow data to a file works as intended."""
     path = tmp_path / "test.csv"
-    flow_data = FlowDataInput.from_file(sample_flow)
+    flow_data = FlowDataInput.from_file(sample_flow_2018)
     flow_data.to_file(path)
 
     assert path.is_file()

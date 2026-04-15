@@ -1,0 +1,4 @@
+[submodule "cequalw2"]
+	path = cequalw2
+    branch = v4.5
+	url = https://github.com/steelhead-dev/cequalw2

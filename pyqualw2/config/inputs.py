@@ -124,7 +124,8 @@ class BathymetryInput(BaseInput):
     def _ingest_data(df: pd.DataFrame) -> pd.DataFrame:
         """Preprocess the raw bathymetry data.
 
-        - Drop the last column, it's only there because of superfluous ',' separators
+        - Drop the last column if it's full of NaN, it's only (sometimes) there because
+          of superfluous ',' separators
         - Reorder and label the columns for human readability
 
         Parameters
@@ -146,9 +147,10 @@ class BathymetryInput(BaseInput):
         pd.DataFrame
             The preprocessed bathymetry
         """
-        # There's an extra comma delimeter at the end of each column which results in a
-        # phantom column, so we drop that extra column here
-        df = df.drop(columns=df.columns[-1])
+        # There _can_ be an extra comma delimeter at the end of each column which
+        # results in a NaN column, so we drop that extra column here
+        if df[df.columns[-1]].isna().all():
+            df = df[df.columns[:-1]]
 
         # Rename and reorder the columns to make more sense
         nsegments = len(df.columns) - 2
@@ -248,7 +250,7 @@ class BathymetryInput(BaseInput):
         )
 
         return cls(
-            filename=filename,
+            filename=Path(filename),
             segment_data=segment_data,
             comment=comment,
             ignored=ignored,
@@ -287,6 +289,20 @@ class BathymetryInput(BaseInput):
             self._format_export_data(self.data).to_csv(
                 f, sep=",", index=False, header=None
             )
+
+    def __eq__(self, other):  # noqa: ANN001
+        """Check for equality with another BathymetryInput object.
+
+        Two BathymetryInput instances are considered equal if their segment and layer
+        data is all the same, and if their ignored lines and comment lines also match.
+        """
+        return (
+            isinstance(other, BathymetryInput)
+            and self.data.equals(other.data)
+            and self.segment_data.equals(other.segment_data)
+            and self.ignored == other.ignored
+            and self.comment == other.comment
+        )
 
 
 @dataclass

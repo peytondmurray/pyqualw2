@@ -1,6 +1,10 @@
-# Test data
+# qualw2 output files
 *.opt
 w2.err
+w2.wrn
+flowbal.csv
+*.w2l
+wl.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
