@@ -6,12 +6,20 @@ jobs:
     strategy:
       matrix:
         python-version: ['3.14']
-
+    env:
+      DISPLAY: ':99.0'
     steps:
       - name: Install Wine
         run: |
           sudo apt update
           sudo apt install -y wine
+
+      # https://github.com/hajimehoshi/ebiten/blob/main/.github/workflows/test.yml
+      # https://stackoverflow.com/a/72072732/8100451
+      - name: Set up virtual X server
+        run: |
+          Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+
       - uses: actions/checkout@v6
         with:
           submodules: true

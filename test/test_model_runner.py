@@ -3,8 +3,6 @@ from collections.abc import Generator
 from contextlib import contextmanager  # noqa: I001
 from pathlib import Path
 
-import pytest
-
 from pyqualw2 import model_runner
 from pyqualw2.config.config import Config
 
@@ -25,9 +23,6 @@ def cp_cequalw2_binary(path: Path | str) -> Generator[Path]:
     (path / "w2_v45_64.exe").unlink()
 
 
-@pytest.mark.skip(
-    reason="Currently broken because X11 server isn't installed on the GH runner."
-)
 def test_model_runner(
     tmp_path,
     sample_w2_con,
