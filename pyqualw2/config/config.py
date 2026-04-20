@@ -5,8 +5,10 @@ from typing import Any, Self
 
 from .inputs import (
     BathymetryInput,
-    FlowDataInput,
+    FlowData,
+    FlowInput,
     MetDataInput,
+    NoopInput,
     ProfileInput,
     TempDataInput,
     W2ConSimpleInput,
@@ -21,16 +23,31 @@ class Config:
         con: W2ConSimpleInput,
         bathymetry: BathymetryInput,
         profile: ProfileInput,
-        temp_data: TempDataInput,
         met_data: MetDataInput,
-        flow_data: FlowDataInput,
+        shade: NoopInput,
+        temp_data: list[TempDataInput],
+        branch_inflow: list[FlowInput],
+        branch_outflow: list[FlowInput],
+        branch_evaporation: list[FlowInput],
+        temperature_tributaries: list[NoopInput],
+        wind_sheltering: NoopInput,
+        cequalw2_path: PathLike,
     ):
         self.con = con
         self.bathymetry = bathymetry
         self.profile = profile
-        self.temp_data = temp_data
         self.met_data = met_data
-        self.flow_data = flow_data
+        self.shade = shade
+        self.wind_sheltering = wind_sheltering
+        self.temperature_tributaries = temperature_tributaries
+
+        # Branch-specific data
+        self.temp_data = temp_data
+        self.branch_inflow = branch_inflow
+        self.branch_outflow = branch_outflow
+        self.branch_evaporation = branch_evaporation
+
+        self.cequalw2_path = Path(cequalw2_path)
 
     def parameterize(self, parameters: dict[str, Any]) -> list["Config"]:
         """Parameterize the config by creating a new config for each met data file.
@@ -45,17 +62,25 @@ class Config:
         sim_start, _sim_end, _sim_year = self.con.timedata
 
         for filename in parameters["met_data"]:
+            # Fudge the met data dates so that cequalw2 can simulate scenarios
+            # with various metrology data
             met_data = MetDataInput.from_file(filename)
-            # Fudge the met data dates so that qualw2 runs with arbitrary years
             met_data.set_false_julian_day(sim_start)
+
             results.append(
                 Config(
-                    self.con,
-                    self.bathymetry,
-                    self.profile,
-                    self.temp_data,
-                    met_data,
-                    self.flow_data,
+                    con=self.con,
+                    bathymetry=self.bathymetry,
+                    profile=self.profile,
+                    met_data=met_data,
+                    temp_data=self.temp_data,
+                    shade=self.shade,
+                    branch_inflow=self.branch_inflow,
+                    branch_outflow=self.branch_outflow,
+                    branch_evaporation=self.branch_evaporation,
+                    temperature_tributaries=self.temperature_tributaries,
+                    wind_sheltering=self.wind_sheltering,
+                    cequalw2_path=self.cequalw2_path,
                 )
             )
         return results
@@ -66,9 +91,20 @@ class Config:
         con: PathLike,
         bathymetry: PathLike,
         profile: PathLike,
-        temp_data: PathLike,
         met_data: PathLike,
-        flow_data: PathLike,
+        shade: PathLike,
+        wind_sheltering: PathLike,
+        temp_data: list[PathLike],
+        temperature_tributaries: list[PathLike],
+        cequalw2_path: PathLike,
+        flow_data: PathLike | None = None,
+        flow_data_date_col: str | None = None,
+        flow_data_inflow_cols: list[list[str]] | None = None,
+        flow_data_outflow_cols: list[list[str]] | None = None,
+        flow_data_evaporation_cols: list[list[str]] | None = None,
+        branch_inflow: list[PathLike] | None = None,
+        branch_outflow: list[PathLike] | None = None,
+        branch_evaporation: list[PathLike] | None = None,
     ) -> Self:
         """Generate a Config from w2_con, bathymetry, and intial profile files.
 
@@ -81,24 +117,106 @@ class Config:
         profile : PathLike
             Path to the intial profile file, e.g. mvpr1.csv
         met_data : PathLike
-            Path to the met data input file, e.g. mmet3.csv
-        temp_data : PathLike
-            Path to the infow temp data input file, e.g. mmet3.csv
-        flow_data : PathLike
-            Path to the inflow flow data input file, e.g. mqin_br.csv.
+            Path to the met data input file, e.g.
+            historic_data/met_data/2018_CEQUAL_met_inputs.csv, or inputs/mtin_br1.csv
+        temp_data : list[PathLike]
+            Path to the branch temp data input file, e.g.
+            historic_data/temp_data/SJA_2018_temp.csv
+        flow_data : PathLike | None
+            Path to the inflow flow data input file,
+            historic_data/temp_data/2018_Observed_Flow.csv. If provided,
+            flow_data_date_col, flow_data_inflow_cols, flow_data_outflow_cols,
+            and flow_data_evaporation_cols must also be provided. If not provided,
+            branch_inflow, branch_outflow, and branch_evaporation must be provided.
+        shade : PathLike
+            Path to the shade file, e.g. inputs/mshade.npt
+        temperature_tributaries : PathLike
+            Path to the temperature tributaries files, e.g. mtdt_br1.csv
+        cequalw2_path : PathLike
+            Path to the cequalw2 binary
+        wind_sheltering : PathLike
+            Path to the wind sheltering file, e.g. inputs/mwsc.npt
+        flow_data_date_col: str | None
+            Column name in the flow data to use for date
+        flow_data_inflow_cols: list[str] | None
+            Column names in the flow data to use for each branch inflow file
+        flow_data_outflow_cols: list[str] | None
+            Column names in the flow data to use for each branch outflow file
+        flow_data_evaporation_cols: list[str] | None
+            Column names in the flow data to use for each branch evaporation file
+        branch_inflow: list[PathLike] | None
+            Paths to individual branch inflow files (if no flow_data provided)
+        branch_outflow: list[PathLike] | None
+            Paths to individual branch outflow files (if no flow_data provided)
+        branch_evaporation: list[PathLike] | None
+            Paths to individual branch evaporation files (if no flow_data provided)
 
         Returns
         -------
         Self
             A Config instance containing all the information needed to run a simulation
         """
+        if flow_data is None:
+            if (
+                branch_inflow is None
+                or branch_outflow is None
+                or branch_evaporation is None
+            ):
+                raise ValueError(
+                    "Either historical branch flow data or individual branch inflow, "
+                    "outflow, and evaporation files must be specified."
+                )
+            inflow = [FlowInput.from_file(f) for f in branch_inflow]
+            outflow = [FlowInput.from_file(f) for f in branch_outflow]
+            evaporation = [FlowInput.from_file(f) for f in branch_evaporation]
+        else:
+            if any([branch_evaporation, branch_inflow, branch_outflow]):
+                raise ValueError(
+                    "Either a flow file or (branch evaporation, branch inflow, "
+                    "and branch outflow) files must be specified, not both."
+                )
+
+            if (
+                flow_data_date_col is None
+                or flow_data_inflow_cols is None
+                or flow_data_outflow_cols is None
+                or flow_data_evaporation_cols is None
+            ):
+                raise ValueError(
+                    "Date, inflow, outflow, and evaporation column names for each "
+                    "branch must be provided if a historical flow file is specified."
+                )
+
+            flow = FlowData.from_file(
+                flow_data,
+                date_col=flow_data_date_col,
+                inflow_cols=flow_data_inflow_cols,
+                outflow_cols=flow_data_outflow_cols,
+                evaporation_cols=flow_data_evaporation_cols,
+            )
+
+            # American Bureau of Reclamation flow data format means that these all
+            # appear in the same historical data file; need to split this for cequalw2
+            # to ingest
+            inflow = flow.to_inflow_inputs()
+            outflow = flow.to_outflow_inputs()
+            evaporation = flow.to_evaporation_inputs()
+
         return cls(
             con=W2ConSimpleInput.from_file(con),
             bathymetry=BathymetryInput.from_file(bathymetry),
             profile=ProfileInput.from_file(profile),
-            temp_data=TempDataInput.from_file(temp_data),
             met_data=MetDataInput.from_file(met_data),
-            flow_data=FlowDataInput.from_file(flow_data),
+            shade=NoopInput.from_file(shade),
+            temperature_tributaries=[
+                NoopInput.from_file(f) for f in temperature_tributaries
+            ],
+            wind_sheltering=NoopInput.from_file(wind_sheltering),
+            temp_data=[TempDataInput.from_file(f) for f in temp_data],
+            cequalw2_path=cequalw2_path,
+            branch_inflow=inflow,
+            branch_outflow=outflow,
+            branch_evaporation=evaporation,
         )
 
     @classmethod
@@ -120,7 +238,6 @@ class Config:
 
     def to_directory(
         self,
-        source_directory: PathLike,
         working_directory: PathLike,
         overwrite: bool = False,
         create_parents: bool = True,
@@ -131,8 +248,6 @@ class Config:
 
         Parameters
         ----------
-        source_directory : PathLike
-            Path to the directory where the model files are read from
         working_directory : PathLike
             Path to the directory where the configuration files should be written
         overwrite : bool
@@ -140,60 +255,45 @@ class Config:
         create_parents : bool
             If True, create any necessary parent directories.
         """
-        working_path = Path(working_directory)
-        inputs_dir_path = working_path / "inputs"
-
-        # Copy the source directory to the working directory
-        shutil.copytree(source_directory, working_path, dirs_exist_ok=True)
+        working_directory = Path(working_directory)
+        inputs = working_directory / "inputs"
 
         self.con.to_file(
-            working_path / "w2_con.csv", overwrite=True, create_parents=True
+            working_directory / "w2_con.csv", overwrite=True, create_parents=True
         )
-
-        fnames = ["mbth_wb1.csv", "mvpr1.npt"]
 
         for fname, obj in zip(
-            fnames,
-            [self.bathymetry, self.profile],
+            ["mbth_wb1.csv", "mvpr1.npt", "mmet3.csv", "mshade.npt", "mwsc.npt"],
+            [
+                self.bathymetry,
+                self.profile,
+                self.met_data,
+                self.shade,
+                self.wind_sheltering,
+            ],
             strict=True,
         ):
-            obj.to_file(inputs_dir_path / fname, overwrite, create_parents)
+            obj.to_file(inputs / fname, overwrite, create_parents)
 
-        self.met_data.to_file(
-            inputs_dir_path / "mmet3.csv", overwrite=True, create_parents=True
-        )
+        # Write the branch-specific files. Note that not all branches have each file,
+        # so we iterate over them separately here
+        for i, inflow in enumerate(self.branch_inflow, start=1):
+            inflow.to_file(inputs / f"mqin_br{i}.csv", overwrite, create_parents)
 
-        for i in range(1, self.con.branchdata + 1):
-            if i == 1:
-                self.flow_data.to_file(
-                    inputs_dir_path / ("mqin_br" + str(i) + ".csv"),
-                    overwrite=True,
-                    create_parents=True,
-                )
-                self.flow_data.to_evap_csv_file(
-                    inputs_dir_path / ("mqdt_br" + str(i) + ".csv"),
-                    overwrite=True,
-                    create_parents=True,
-                )
-                self.flow_data.to_outflow_csv_file(
-                    inputs_dir_path / ("mqot_br" + str(i) + ".csv"),
-                    overwrite=True,
-                    create_parents=True,
-                )
-                self.temp_data.to_file(
-                    inputs_dir_path / ("mtin_br" + str(i) + ".csv"),
-                    overwrite=True,
-                    create_parents=True,
-                )
-            else:
-                self.flow_data.to_file(
-                    inputs_dir_path / ("mqin_br" + str(i) + ".csv"),
-                    overwrite=True,
-                    create_parents=True,
-                    zero_flow=True,
-                )
-                self.temp_data.to_file(
-                    inputs_dir_path / ("mtin_br" + str(i) + ".csv"),
-                    overwrite=True,
-                    create_parents=True,
-                )
+        # These _should_ be branch-specific, but isn't. Tracking issue:
+        # https://github.com/steelhead-dev/pyqualw2/issues/64
+        for i, temp in enumerate(self.temp_data, start=1):
+            temp.to_file(inputs / f"mtin_br{i}.csv", overwrite, create_parents)
+
+        # Branch flow and temperature changes (rain and rain temperature)
+        for i, evaporation in enumerate(self.branch_evaporation, start=1):
+            evaporation.to_file(inputs / f"mqdt_br{i}.csv", overwrite, create_parents)
+        for i, temperature in enumerate(self.temperature_tributaries, start=1):
+            temperature.to_file(inputs / f"mtdt_br{i}.npt", overwrite, create_parents)
+
+        for i, outflow in enumerate(self.branch_outflow, start=1):
+            outflow.to_file(inputs / f"mqot_br{i}.csv", overwrite, create_parents)
+
+        # Write the cequalw2 binary to the directory, since it needs to be in the same
+        # directory as the data to work (paths are hardcoded in fortran...)
+        shutil.copy(self.cequalw2_path, working_directory / self.cequalw2_path.name)

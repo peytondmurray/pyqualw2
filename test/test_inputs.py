@@ -5,7 +5,7 @@ import pytest
 
 from pyqualw2.config.inputs import (
     BathymetryInput,
-    FlowDataInput,
+    FlowData,
     MetDataInput,
     ProfileInput,
     TempDataInput,
@@ -37,7 +37,13 @@ def test_read_temp_data_from_file(sample_temp_2018):
 
 def test_read_flow_data_from_file(sample_flow_2018):
     """Test that a flow_data df is generated from a flow_data input file."""
-    flow_data = FlowDataInput.from_file(sample_flow_2018)
+    flow_data = FlowData.from_file(
+        sample_flow_2018,
+        date_col="Date",
+        inflow_cols=[["M_IN"]],
+        outflow_cols=[["SJR_OUT"]],
+        evaporation_cols=[["MIL_EVAP"]],
+    )
     assert flow_data.filename == sample_flow_2018
     assert flow_data.data.columns[0] == "Date"
 
@@ -141,12 +147,24 @@ def test_write_temp(sample_temp_2018, tmp_path):
 
 
 def test_write_flow(sample_flow_2018, tmp_path):
-    """Test that writing flow data to a file works as intended."""
-    path = tmp_path / "test.csv"
-    flow_data = FlowDataInput.from_file(sample_flow_2018)
-    flow_data.to_file(path)
+    """Test that writing flow data to files works as intended."""
+    flow_data = FlowData.from_file(
+        sample_flow_2018,
+        date_col="Date",
+        inflow_cols=[["M_IN"]],
+        outflow_cols=[["SJR_OUT"]],
+        evaporation_cols=[["MIL_EVAP"]],
+    )
 
-    assert path.is_file()
+    for data_group in [
+        flow_data.to_evaporation_inputs(),
+        flow_data.to_inflow_inputs(),
+        flow_data.to_outflow_inputs(),
+    ]:
+        for item in data_group:
+            path = tmp_path / "data.csv"
+            item.to_file(path, overwrite=True)
+            assert path.is_file()
 
 
 def test_write_bathymetry(sample_bathymetry, tmp_path):

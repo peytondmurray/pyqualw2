@@ -41,7 +41,10 @@ class ModelRunner:
     def run(self):
         """Run the model for each configuration in the list."""
         wd = self.make_temp_wd()
-        self.config.to_directory(self.source_dir, wd, overwrite=True)
+        self.config.to_directory(wd, overwrite=True)
+
+        # Make the outputs directory, otherwise cequalw2 will fail
+        (wd / "outputs").mkdir(exist_ok=True)
         self.run_model(wd)
         run_output_dir = self.output_dir / self.run_name
         self.save_outputs(wd, run_output_dir)

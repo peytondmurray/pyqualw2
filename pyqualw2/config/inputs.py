@@ -501,11 +501,38 @@ class ProfileInput(BaseInput):
 
             # Write the data in 9 "columns", wrapping as needed to print all the data
             for row in arr.to_numpy().reshape((-1, 9)):
-                lines.append("        " + "".join(f"{val:>8.2f}" for val in row))
+                lines.append(
+                    "        " + "".join(self._format_value(val) for val in row)
+                )
             lines.append("")
 
         with open(path, "w") as f:
             f.write("\n".join(lines))
+
+    @staticmethod
+    def _format_value(val: float) -> str:
+        """Format a floating point value as a string for output in mvpr1.npt.
+
+        This weird formatting requirement strips a single trailing `0` from the
+        formatted string if present, and otherwise matches the behavior of an `>8.2f`
+        string format specifier. This is REQUIRED by cequalw2 (???), and otherwise
+        causes an error, and obviously doesn't preserve the number of significant
+        digits.
+
+        Parameters
+        ----------
+        val : float
+            Value to format
+
+        Returns
+        -------
+        str
+            Formatted string
+        """
+        result = f"{val:>8.2f}"
+        if result[-1] == "0":
+            return f" {result[:-1]}"
+        return result
 
     @staticmethod
     def _get_label(name: str) -> str:
@@ -614,16 +641,17 @@ class W2ConSimpleInput(BaseInput):
             f.write(self.content)
 
     @property
-    def branchdata(self) -> int:
-        """Get the number of Branches for the configuration.
+    def n_branches(self) -> int:
+        """Get the number of branches for the configuration.
 
         Returns
         -------
         int
-            nwb = number of water bodes
-            nbr = number of branches
+            The number of branches in the water system
         """
         lines = self.content.splitlines(keepends=True)
+
+        # nwb: number of water bodies
         _nwb, nbr, *_rest = lines[self.nwb_lineno].split(",")
         return int(nbr)
 
@@ -703,8 +731,6 @@ class TempDataInput(BaseInput):
             If True, overwrite an existing file
         create_parents : bool
             If True, create any necessary parent directories
-        number_of_branches : int
-            Detirmines number of inflow temperature input files to generate
         """
         path = Path(filename)
         if path.suffix != ".csv":
@@ -722,185 +748,6 @@ class TempDataInput(BaseInput):
 
         # This pedantic formatting is required
         # by the current windows binaries for CeQual-W2
-
-        buf = StringIO()
-        buf.write("$\n\n")
-        working_data.to_csv(buf, index=False)
-
-        with open(filename, "w", encoding="utf-8", newline="") as file:
-            file.write(buf.getvalue())
-
-
-@dataclass
-class FlowDataInput(BaseInput):
-    """A simple parser for the inflow flow data input to QualW2."""
-
-    data: pd.DataFrame
-    filename: PathLike | str | None = None
-    evaporation_column_name: str = "MIL_EVAP"
-
-    @classmethod
-    def from_file(cls, filename: PathLike | str) -> Self:
-        """Select and parse inflow flow input file from database.
-
-        Parameters
-        ----------
-        filename : PathLike | str
-            Path to inflow flow data file
-
-        Returns
-        -------
-        Self
-            An object wrapping the selected year's flow data input.
-        """
-        if Path(filename).suffix != ".csv":
-            raise NotImplementedError
-
-        return cls(
-            filename=filename,
-            data=pd.read_csv(filename),
-        )
-
-    def to_file(
-        self,
-        filename: PathLike | str = "mqin_br.csv",
-        overwrite: bool = False,
-        create_parents: bool = False,
-        zero_flow: bool = False,
-        date_column_name: str = "Date",
-        inflow_column_name: str = "M_IN",
-    ):
-        """Write the flow data to a csv file.
-
-        Parameters
-        ----------
-        filename : PathLike | str
-            Path where the data should be written
-        overwrite : bool
-            If True, overwrite an existing file
-        create_parents : bool
-            If True, create any necessary parent directories
-        zero_flow : bool
-            If True, set the inflow flow to 0
-        date_column_name : str
-            The name of the date column to write to the file
-        inflow_column_name : str
-            The name of the inflow column to write to the file
-        """
-        path = Path(filename)
-        if path.suffix != ".csv":
-            raise NotImplementedError
-
-        _create_parents_or_fail(path, overwrite, create_parents)
-
-        working_data = self.data[[date_column_name, inflow_column_name]].copy()
-
-        if zero_flow:
-            working_data[inflow_column_name] = 0
-
-        working_data[date_column_name] = pd.to_datetime(working_data[date_column_name])
-
-        working_data[date_column_name] = (
-            working_data[date_column_name] - JULIAN_REFERENCE_START
-        ).dt.days
-        buf = StringIO()
-        buf.write("$\n\n")
-        working_data.to_csv(buf, index=False)
-
-        # This pedantic formatting is required by the
-        # current windows binaries for CeQual-W2
-
-        with open(filename, "w", encoding="utf-8", newline="") as file:
-            file.write(buf.getvalue())
-
-    def to_evap_csv_file(
-        self,
-        filename: PathLike | str = "mqdt_br.csv",
-        overwrite: bool = False,
-        create_parents: bool = False,
-        date_column_name: str = "Date",
-        evaporation_column_name: str = "MIL_EVAP",
-    ):
-        """Write the evaporation data to a csv file.
-
-        Parameters
-        ----------
-        filename : PathLike | str
-            Path where the evaporation data should be written
-        overwrite : bool
-            If True, overwrite an existing file
-        create_parents : bool
-            If True, create any necessary parent directories
-        date_column_name : str
-            The name of the date column to write to the file
-        evaporation_column_name : str
-            The name of the evaporation column to write to the file
-        """
-        path = Path(filename)
-        if path.suffix != ".csv":
-            raise NotImplementedError
-
-        _create_parents_or_fail(path, overwrite, create_parents)
-
-        working_data = self.data[[date_column_name, evaporation_column_name]].copy()
-
-        working_data[date_column_name] = pd.to_datetime(working_data[date_column_name])
-
-        working_data[date_column_name] = (
-            working_data[date_column_name] - JULIAN_REFERENCE_START
-        ).dt.days
-        buf = StringIO()
-        buf.write("$\n\n")
-        working_data.to_csv(buf, index=False)
-
-        # This pedantic formatting is required by the
-        # current windows binaries for CeQual-W2
-
-        with open(filename, "w", encoding="utf-8", newline="") as file:
-            file.write(buf.getvalue())
-
-    def to_outflow_csv_file(
-        self,
-        filename: PathLike | str = "mqot_br.csv",
-        overwrite: bool = False,
-        create_parents: bool = False,
-        outflow_column_names: list[str] | None = None,
-        date_column_name: str = "Date",
-    ) -> None:
-        """Write the outflow data to a csv file.
-
-        Parameters
-        ----------
-        filename : PathLike | str
-            Path where the outflow data should be written
-        overwrite : bool
-            If True, overwrite an existing file
-        create_parents : bool
-            If True, create any necessary parent directories
-        outflow_column_names : list[str] | None
-            The names of the outflow columns to write to the file
-        date_column_name : str
-            The name of the date column to write to the file
-        """
-        if outflow_column_names is None:
-            outflow_column_names = ["SPL_OUT", "FKC_OUT", "MC_OUT", "SJR_OUT"]
-
-        path = Path(filename)
-        if path.suffix != ".csv":
-            raise NotImplementedError
-
-        _create_parents_or_fail(path, overwrite, create_parents)
-
-        working_data = self.data[[date_column_name] + outflow_column_names].copy()
-
-        working_data[date_column_name] = pd.to_datetime(working_data[date_column_name])
-
-        working_data[date_column_name] = (
-            working_data[date_column_name] - JULIAN_REFERENCE_START
-        ).dt.days
-
-        # This pedantic formatting is required by the
-        # current windows binaries for CeQual-W2
 
         buf = StringIO()
         buf.write("$\n\n")
@@ -991,6 +838,210 @@ class MetDataInput(BaseInput):
 
         with open(filename, "w", encoding="utf-8", newline="") as file:
             file.write(buf.getvalue())
+
+
+@dataclass
+class NoopInput(BaseInput):
+    """An input which only contains the text of an input file.
+
+    No processing is done on the input, and when to_file is called, it simply writes
+    the same text to the output file.
+    """
+
+    text: str
+    filename: str | None = None
+
+    @classmethod
+    def from_file(cls, filename: PathLike | str) -> Self:
+        """Parse a data file to a python object.
+
+        Parameters
+        ----------
+        filename : PathLike | str
+            Path to the data file
+
+        Returns
+        -------
+        Self
+            An object containing the data from the file
+        """
+        return cls(
+            filename=str(filename),
+            text=Path(filename).read_text(),
+        )
+
+    def to_file(
+        self,
+        filename: PathLike | str,
+        overwrite: bool = False,
+        create_parents: bool = False,
+    ):
+        """Write the input to a file.
+
+        Parameters
+        ----------
+        filename : PathLike | str
+            Path where the data should be written
+        overwrite : bool
+            If True, overwrite an existing file
+        create_parents : bool
+            If True, create any necessary parent directories
+        """
+        path = Path(filename)
+        _create_parents_or_fail(path, overwrite, create_parents)
+        path.write_text(self.text)
+
+
+@dataclass
+class FlowInput(BaseInput):
+    """A parser for historical branch inflow, outflow, and evaporation data."""
+
+    data: pd.DataFrame
+    filename: PathLike | str | None = None
+
+    @classmethod
+    def from_file(cls, filename: PathLike | str) -> Self:
+        """Parse a data file to a python object.
+
+        Parameters
+        ----------
+        filename : PathLike | str
+            Path to the data file
+
+        Returns
+        -------
+        Self
+            An object containing the data from the file
+        """
+        return cls(filename=filename, data=pd.read_csv(filename, skiplines=2))
+
+    def to_file(
+        self,
+        filename: PathLike | str,
+        overwrite: bool = False,
+        create_parents: bool = False,
+    ):
+        """Serialize the config to a file.
+
+        Parameters
+        ----------
+        filename : PathLike | str
+            Path where the data should be written
+        overwrite : bool
+            If True, overwrite an existing file
+        create_parents : bool
+            If True, create any necessary parent directories
+        """
+        path = Path(filename)
+        _create_parents_or_fail(path, overwrite, create_parents)
+
+        buf = StringIO()
+        buf.write("$\n\n")
+        self.data.to_csv(buf, index=False)
+        path.write_text(buf.getvalue())
+
+
+@dataclass
+class FlowData:
+    """A simple parser for the inflow, outflow, and evaporation data.
+
+    This object holds historic flow data; since cequalw2 requires the inflow, outflow,
+    and evaporation to be separate files, this class acts as an intermediary, splitting
+    the data to produce the separate NoopInput class instances that write the data to
+    disk prior to a simulation.
+    """
+
+    data: pd.DataFrame
+    date_col: str
+    inflow_cols: list[list[str]]
+    outflow_cols: list[list[str]]
+    evaporation_cols: list[list[str]]
+    filename: PathLike | str | None = None
+
+    @classmethod
+    def from_file(
+        cls,
+        filename: PathLike | str,
+        date_col: str,
+        inflow_cols: list[list[str]],
+        outflow_cols: list[list[str]],
+        evaporation_cols: list[list[str]],
+    ) -> Self:
+        """Preprocess a historical flow data file.
+
+        Parameters
+        ----------
+        date_col : str
+            Name of the column containing the date
+        inflow_cols : list[list[str]]
+            Names of the inflow columns for each branch
+        outflow_cols : list[list[str]]
+            The names of the columns to include in each branch file
+        evaporation_cols : list[list[str]]
+            Names of the evaporation column for each branch
+        filename : PathLike | str | None
+            Name of the original file to ingest
+
+        Returns
+        -------
+        Self
+            A FlowData instance containing the processed flow data
+        """
+        if Path(filename).suffix != ".csv":
+            raise NotImplementedError
+
+        data = pd.read_csv(filename)
+        data[date_col] = (
+            pd.to_datetime(data[date_col]) - JULIAN_REFERENCE_START
+        ).dt.days
+
+        return cls(
+            filename=filename,
+            data=data,
+            date_col=date_col,
+            inflow_cols=inflow_cols,
+            outflow_cols=outflow_cols,
+            evaporation_cols=evaporation_cols,
+        )
+
+    def to_inflow_inputs(self) -> list[FlowInput]:
+        """Generate a list inflow data inputs for each branch.
+
+        Returns
+        -------
+        list[NoopInput]
+            Inflow data for each branch
+        """
+        inputs = []
+        for cols in self.inflow_cols:
+            inputs.append(FlowInput(data=self.data[cols]))
+        return inputs
+
+    def to_outflow_inputs(self) -> list[FlowInput]:
+        """Generate a list outflow data inputs for each branch.
+
+        Returns
+        -------
+        list[NoopInput]
+            Outflow data for each branch
+        """
+        inputs = []
+        for cols in self.outflow_cols:
+            inputs.append(FlowInput(data=self.data[cols]))
+        return inputs
+
+    def to_evaporation_inputs(self) -> list[FlowInput]:
+        """Generate a list evaporation data inputs for each branch.
+
+        Returns
+        -------
+        list[NoopInput]
+            Evaporation data for each branch
+        """
+        inputs = []
+        for cols in self.evaporation_cols:
+            inputs.append(FlowInput(data=self.data[cols]))
+        return inputs
 
 
 def _create_parents_or_fail(

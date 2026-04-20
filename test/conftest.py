@@ -43,3 +43,27 @@ def sample_temp_2018(sample_data1) -> Path:
 def sample_flow_2018(sample_data1) -> Path:
     """Get the path to an example inflow data input file."""
     return sample_data1 / "historic_data" / "flow_data" / "2018_Observed_Flow.csv"
+
+
+@pytest.fixture
+def sample_shade(sample_data1) -> Path:
+    """Get the path to an example shade data input file."""
+    return sample_data1 / "inputs" / "mshade.npt"
+
+
+@pytest.fixture
+def sample_wind_sheltering(sample_data1) -> Path:
+    """Get the path to an example wind sheltering data input file."""
+    return sample_data1 / "inputs" / "mwsc.npt"
+
+
+@pytest.fixture
+def sample_temperature_tributary(sample_data1) -> Path:
+    """Get the path to an example tributary temperature data input file."""
+    return sample_data1 / "inputs" / "mtdt_br1.npt"
+
+
+@pytest.fixture
+def cequalw2_binary() -> Path:
+    """Get the path to the cequalw2 binary."""
+    return Path(__file__).parent.parent / "cequalw2" / "w2_v45_64.exe"
