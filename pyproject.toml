@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "pyqualw2"
 description = "A CE-QUAL-W2 orchestration toolkit"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.14"
 dependencies = [
     "typer>=0.20",
     "pandas",
@@ -24,6 +24,10 @@ dev = [
 test = [
     "pytest"
 ]
+
+[tool.pytest]
+log_cli = true
+log_cli_level = "INFO"
 
 [workspace]
 authors = [
@@ -67,7 +71,6 @@ select = [
     "ARG", # flake8-unused-arguments
     "B", # flake8-bugbear
     "D", # pydocstyle
-    "DOC", # pydoclint
     "E", # pycodestyle
     "ERA", # flake8-eradicate
     "F", # Pyflakes

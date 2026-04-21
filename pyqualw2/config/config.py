@@ -49,7 +49,7 @@ class Config:
 
         self.cequalw2_path = Path(cequalw2_path)
 
-    def parameterize(self, parameters: dict[str, Any]) -> list["Config"]:
+    def parameterize(self, parameters: dict[str, Any]) -> list[Config]:
         """Override settings for each parameter, generating a new set of Configs.
 
         See the documentation for pytest's `pytest.mark.parametrize` function, which
