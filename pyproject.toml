@@ -67,6 +67,7 @@ select = [
     "ARG", # flake8-unused-arguments
     "B", # flake8-bugbear
     "D", # pydocstyle
+    "DOC", # pydoclint
     "E", # pycodestyle
     "ERA", # flake8-eradicate
     "F", # Pyflakes
@@ -103,11 +104,15 @@ ignore = [
     "UP032", # Use f-string instead of `format` call; not always clearer
 ]
 
+[tool.ruff.lint.pydocstyle]
+convention = 'numpy'
+
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
 "test/*.py" = [
     "ANN001",
     "N802",  # Function name should be lowercase
+    "DOC201", # Return not documented in docstring
 ]
 "pyqualw2/config/subconfig.py" = [
     "D101",

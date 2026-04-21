@@ -50,11 +50,25 @@ class ModelRunner:
         self.save_outputs(wd, run_output_dir)
 
     def make_temp_wd(self) -> Path:
-        """Make a temporary working directory."""
+        """Make a temporary working directory to run cequalw2 in.
+
+        Returns
+        -------
+        Path
+            Path to the directory
+        """
         return Path(tempfile.mkdtemp())
 
     def save_outputs(self, wd: Path, output_dir: Path):
-        """Save the output files to the output directory."""
+        """Copy the cequalw2-generated outputs to the output directory.
+
+        Parameters
+        ----------
+        wd : Path
+            Working directory where cequalw2 is run
+        output_dir : Path
+            Directory where the user has asked for results to be placed
+        """
         if not output_dir.exists():
             output_dir.mkdir(parents=True)
 
@@ -64,7 +78,21 @@ class ModelRunner:
         return
 
     def run_model(self, wd: Path):
-        """Run the model for the given configuration."""
+        """Run the cequalw2 binary in a subprocess.
+
+        Parameters
+        ----------
+        wd : Path
+            Path to the working directory. Must contain the cequalw2 binary
+
+        Raises
+        ------
+        TimeoutExpired
+            Never actually raised. See
+            https://github.com/steelhead-dev/pyqualw2/issues/59 for the tracking issue.
+        Exception
+            Possibly not raised? Not sure what can fail here. See the issue above.
+        """
         model_path = wd / "w2_v45_64.exe"
         try:
             if os.name == "nt":  # Windows
@@ -136,17 +164,28 @@ class ModelRunner:
             raise
 
     def check_file_activity(self, file_path: Path, timeout: int = 10) -> bool:
-        """Check if the file has been modified within the timeout period."""
-        try:
-            if not os.path.exists(file_path):
-                return False
+        """Check if the file has been modified within the timeout period.
 
-            # Get the current time and file's last modification time
-            current_time = time.time()
-            file_mtime = os.path.getmtime(file_path)
+        Parameters
+        ----------
+        file_path : Path
+            Path to the file to check for modifications
+        timeout : int
+            Number of seconds to consider when checking for activity
 
-            # Check if the file has been modified within the timeout period
-            time_since_mod = current_time - file_mtime
-            return time_since_mod < timeout
-        except Exception:
+        Returns
+        -------
+        bool
+            True if the file has been modified in the last `timeout` seconds, False
+            otherwise (or if the file doesn't exist)
+        """
+        if not os.path.exists(file_path):
             return False
+
+        # Get the current time and file's last modification time
+        current_time = time.time()
+        file_mtime = os.path.getmtime(file_path)
+
+        # Check if the file has been modified within the timeout period
+        time_since_mod = current_time - file_mtime
+        return time_since_mod < timeout

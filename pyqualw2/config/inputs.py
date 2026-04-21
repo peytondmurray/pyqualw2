@@ -9,7 +9,9 @@ from os import PathLike
 from pathlib import Path
 from typing import ClassVar, Self
 
+import numpy as np
 import pandas as pd
+from numpy.typing import NDArray
 
 JULIAN_REFERENCE_START = datetime.datetime(1921, 1, 1)
 
@@ -295,7 +297,7 @@ class BathymetryInput(BaseInput):
 
         Two BathymetryInput instances are considered equal if their segment and layer
         data is all the same, and if their ignored lines and comment lines also match.
-        """
+        """  # noqa: DOC201
         return (
             isinstance(other, BathymetryInput)
             and self.data.equals(other.data)
@@ -330,6 +332,11 @@ class ProfileInput(BaseInput):
         -------
         Self
             An object containing the layer-dependent quantities from a profile file
+
+        Raises
+        ------
+        ValueError
+            Raised if the profile file doesn't appear to have any temperature data
         """
         if Path(filename).suffix != ".npt":
             raise NotImplementedError
@@ -382,7 +389,7 @@ class ProfileInput(BaseInput):
     @staticmethod
     def _iter_blocks(
         lines: list[str],
-    ) -> Generator[tuple[str, pd.DataFrame]]:
+    ) -> Generator[tuple[str, NDArray[np.float64]]]:
         """Iterate through the data blocks in a profile data file.
 
         Profile files have blocks of data that look like this:
@@ -412,10 +419,15 @@ class ProfileInput(BaseInput):
             Lines from a profile file. Data is assumed to start on lines[0], or lines[1]
             if the current line is empty
 
-        Returns
-        -------
-        Generator[tuple[str, np.NDArray]]
+        Yields
+        ------
+        tuple[str, NDArray[np.float64]]
             Tuples of dataset name and 1-D array of layer-dependent data
+
+        Raises
+        ------
+        ValueError
+            Raised if the name of the data can't be parsed
         """
         while lines:
             i = 0
@@ -424,7 +436,7 @@ class ProfileInput(BaseInput):
                 i += 1
 
             if not lines[i:]:
-                return None
+                return
 
             split = re.split(r"\s+", lines[i].strip())
             if not split:
@@ -459,9 +471,10 @@ class ProfileInput(BaseInput):
 
             # Need to reset the file pointer to the beginning for read_csv
             joined.seek(0)
-            data = (
+            data: NDArray[np.float64] = (
                 pd.read_csv(joined, sep=r"\s+", header=None, index_col=False)
                 .to_numpy()
+                .astype(np.float64)
                 .flatten()
             )
             yield name, data
@@ -588,6 +601,12 @@ class W2ConSimpleInput(BaseInput):
         -------
         Self
             A simple object wrapping the content of a w2_con.csv file
+
+        Raises
+        ------
+        ValueError
+            Raised when the NWB or time data line numbers can't be found, indicating
+            a malformed w2_con.csv
         """
         if Path(filename).suffix != ".csv":
             raise NotImplementedError
@@ -686,14 +705,7 @@ class W2ConSimpleInput(BaseInput):
 
 @dataclass
 class TempDataInput(BaseInput):
-    """A simple parser for the inflow temperature data input to QualW2.
-
-    data : Dataframe | float
-        Pandas dataframe holding the inflow temperature data
-
-    filename : PathLike | str
-        Path to inflow temperature data file
-    """
+    """A simple parser for the inflow temperature data input to QualW2."""
 
     data: pd.DataFrame
     filename: PathLike | str | None = None
@@ -706,6 +718,11 @@ class TempDataInput(BaseInput):
         ----------
         filename : PathLike | str
             Path to inflow temperature data file
+
+        Returns
+        -------
+        Self
+            The temperature data for a branch
         """
         if Path(filename).suffix != ".csv":
             raise NotImplementedError

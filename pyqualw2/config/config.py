@@ -50,12 +50,20 @@ class Config:
         self.cequalw2_path = Path(cequalw2_path)
 
     def parameterize(self, parameters: dict[str, Any]) -> list["Config"]:
-        """Parameterize the config by creating a new config for each met data file.
+        """Override settings for each parameter, generating a new set of Configs.
+
+        See the documentation for pytest's `pytest.mark.parametrize` function, which
+        was the inspiration for this function.
 
         Parameters
         ----------
         parameters : dict[str, Any]
-            A dictionary of parameters to parameterize the configuration with.
+            Configuration settings to override
+
+        Returns
+        -------
+        list["Config"]
+            A list of Config objects, one for each value specified in `parameters`
         """
         results = []
 
@@ -155,6 +163,15 @@ class Config:
         -------
         Self
             A Config instance containing all the information needed to run a simulation
+
+        Raises
+        ------
+        ValueError
+            Raised if
+                1. Both flow_data and branch_{inflow,outflow,evaporation} were given
+                2. flow_data was specified but column names needed to extract
+                   branch-specific flow data were not
+                3. Neither flow_data nor branch_{inflow,outflow,evaporation} were given
         """
         if flow_data is None:
             if (
