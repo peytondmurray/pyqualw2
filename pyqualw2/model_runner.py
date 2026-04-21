@@ -33,13 +33,13 @@ class ModelRunner:
         output_dir: Path,
         source_dir: Path,
         run_name: str,
-        wait_time: int = 30,
+        wait_time: int = 10,
     ):
         self.config = configuration
         self.output_dir = output_dir
         self.source_dir = source_dir
         self.run_name = run_name
-        self.wait_time = wait_time if wait_time is not None else 30
+        self.wait_time = wait_time
 
     def run(self):
         """Run the model for each configuration in the list.
@@ -119,6 +119,13 @@ class ModelRunner:
         # self.wait_time seconds ago, consider the simulation done. Kill the
         # subprocess and return.
         while process.poll() is None:
+            # If the output files are present, update the last access time if it's
+            # more recent that the current last access time
+            for file in output_files:
+                path = wd / "outputs" / file
+                if path.exists():
+                    last_access = max(last_access, path.stat().st_mtime)
+
             log.info(
                 f"Polling process {process.pid}. Last observed change "
                 f"{time.time() - last_access:.2f}/{self.wait_time} ago..."
@@ -129,13 +136,6 @@ class ModelRunner:
                 log.info(f"[Process {process.pid}]: {out!r}")
             if err:
                 log.error(f"[Process {process.pid}]: {err!r}")
-
-            # If the output files are present, update the last access time if it's
-            # more recent that the current last access time
-            for file in output_files:
-                path = wd / file
-                if path.exists():
-                    last_access = max(last_access, path.stat().st_mtime)
 
             if time.time() - last_access > self.wait_time:
                 process.kill()
