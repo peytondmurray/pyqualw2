@@ -1,9 +1,11 @@
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import pytest
 
 from pyqualw2.config.inputs import (
+    JULIAN_REFERENCE_START,
     BathymetryInput,
     FlowData,
     MetDataInput,
@@ -21,11 +23,14 @@ def test_read_met_data_from_file(sample_met_2018):
     assert met_data.data.columns[1] == "JDAY"
 
 
-def test_set_false_julian_day(sample_met_2018):
+@pytest.mark.parametrize("offset", list(range(10, 1000, 100)))
+def test_set_false_julian_day(sample_met_2018, offset):
     """Test that the false julian day can be set for the met data."""
     met_data = MetDataInput.from_file(sample_met_2018)
-    met_data.set_false_julian_day(400)
-    assert met_data.data["date"].iloc[0].year == 1922
+    met_data.set_false_julian_day(offset)
+    assert met_data.data["date"].iloc[0] - JULIAN_REFERENCE_START == pd.to_timedelta(
+        offset, "days"
+    )
 
 
 def test_read_temp_data_from_file(sample_temp_2018):

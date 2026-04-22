@@ -782,17 +782,18 @@ class MetDataInput(BaseInput):
     filename: PathLike | str | None = None
 
     def set_false_julian_day(self, sim_start: float):
-        """Set the false julian day for the met data.
+        """Set the start date to be `sim_start` days since `JULIAN_REFERENCE_START`.
 
         Parameters
         ----------
         sim_start : int
-            The start of the simulation in days since JULIAN_REFERENCE_START
+            The start of the simulation in days since `JULIAN_REFERENCE_START`
         """
-        sim_date = JULIAN_REFERENCE_START + datetime.timedelta(sim_start)
-        sim_year = sim_date.year
-
-        self.data["date"] = self.data["date"] + pd.offsets.DateOffset(year=sim_year)
+        self.data["date"] = JULIAN_REFERENCE_START + (
+            self.data["date"]
+            - self.data["date"].iloc[0]
+            + pd.to_timedelta(sim_start, "days")
+        )
 
     @classmethod
     def from_file(cls, filename: PathLike | str) -> Self:
