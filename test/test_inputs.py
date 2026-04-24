@@ -60,6 +60,42 @@ def test_read_flow_data_from_file(sample_flow_2018):
     assert flow_data.data.columns[0] == "Date"
 
 
+def test_write_flow_data(
+    sample_flow_2018, sample_mqin_br1, sample_mqot_br1, sample_mqdt_br1, tmp_path
+):
+    """Test that flow data can be written correctly."""
+    flow = FlowData.from_file(
+        sample_flow_2018,
+        date_col="Date",
+        inflow_cols=[["Date", "M_IN"]],
+        outflow_cols=[["Date", "SPL_OUT", "FKC_OUT", "MC_OUT", "SJR_OUT"]],
+        evaporation_cols=[["Date", "MIL_EVAP"]],
+    )
+
+    inflows = flow.to_inflow_inputs()
+    outflows = flow.to_outflow_inputs()
+    evaporations = flow.to_evaporation_inputs()
+
+    for objs, file, df in zip(
+        [inflows, outflows, evaporations],
+        ["mqin_br1.csv", "mqot_br1.csv", "mqdt_br1.csv"],
+        [sample_mqin_br1, sample_mqot_br1, sample_mqdt_br1],
+        strict=True,
+    ):
+        # There should only be a single branch, so these flow data objects should
+        # be of length 1
+        assert len(objs) == 1
+        obj = objs[0]
+
+        # Write the inflow/outflow/evaporation for the branch to a file. Then read it
+        # back in, and compare it to the reference data
+        fname = tmp_path / file
+        obj.to_file(fname)
+        data = pd.read_csv(fname, skiprows=2)
+
+        assert df.equals(data)
+
+
 def test_read_w2con_from_file(sample_w2_con):
     """Test that a W2ConSimpleInput can be generated from a w2_con.csv file."""
     w2con = W2ConSimpleInput.from_file(sample_w2_con)

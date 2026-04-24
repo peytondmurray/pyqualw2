@@ -107,5 +107,23 @@ def cequalw2_binary() -> Path:
 
 @pytest.fixture
 def sample_mmet3(sample_inputs) -> pd.DataFrame:
-    """Get some example metrology data ready for cequalw2 input."""
+    """Get some example cequalw2 metrology data."""
     return pd.read_csv(sample_inputs / "mmet3.csv", skiprows=2)
+
+
+@pytest.fixture
+def sample_mqin_br1(sample_inputs) -> pd.DataFrame:
+    """Get some example cequalw2 inflow input data."""
+    return pd.read_csv(sample_inputs / "mqin_br1.csv", skiprows=2)
+
+
+@pytest.fixture
+def sample_mqot_br1(sample_inputs) -> pd.DataFrame:
+    """Get some example cequalw2 outflow input data."""
+    return pd.read_csv(sample_inputs / "mqot_br1.csv", skiprows=2)
+
+
+@pytest.fixture
+def sample_mqdt_br1(sample_inputs) -> pd.DataFrame:
+    """Get some example cequalw2 evaporation input data."""
+    return pd.read_csv(sample_inputs / "mqdt_br1.csv", skiprows=2)

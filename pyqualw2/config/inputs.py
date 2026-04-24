@@ -920,7 +920,14 @@ class NoopInput(BaseInput):
 
 @dataclass
 class FlowInput(BaseInput):
-    """A parser for historical branch inflow, outflow, and evaporation data."""
+    """A parser for historical branch inflow, outflow, and evaporation data.
+
+    By default the output files for this branch-specific flow are named e.g.:
+
+        - mqin_br1.csv: inflow data for branch 1
+        - mqot_br1.csv: outflow data for branch 1
+        - mqdt_br1.csv: evaporation data for branch 1
+    """
 
     data: pd.DataFrame
     filename: PathLike | str | None = None
