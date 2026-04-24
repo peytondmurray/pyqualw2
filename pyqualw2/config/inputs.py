@@ -712,12 +712,13 @@ class TempDataInput(BaseInput):
 
     @classmethod
     def from_file(cls, filename: PathLike | str) -> Self:
-        """Select and Parse inflow temperature input file from database.
+        """Select and parse inflow temperature input file from database.
 
         Parameters
         ----------
         filename : PathLike | str
-            Path to inflow temperature data file
+            Path to inflow temperature data file. This must be a CSV with two columns:
+            `date`, and `temperature`.
 
         Returns
         -------
@@ -727,10 +728,15 @@ class TempDataInput(BaseInput):
         if Path(filename).suffix != ".csv":
             raise NotImplementedError
 
-        return cls(
-            filename=filename,
-            data=pd.read_csv(filename),
+        data = pd.read_csv(filename)
+        date_col = data.columns[0]
+
+        # Convert the date to Julian days relative to JULIAN_REFERENCE_START
+        data[date_col] = to_fractional_days(
+            pd.to_datetime(data[date_col]) - JULIAN_REFERENCE_START
         )
+
+        return cls(filename=filename, data=data)
 
     def to_file(
         self,
@@ -755,20 +761,10 @@ class TempDataInput(BaseInput):
 
         _create_parents_or_fail(path, overwrite, create_parents)
 
-        # CONVERT first column from date to julian day (int) using
-        # JULIAN_REFERENCE_START
-
-        working_data = self.data.iloc[:, 0:2].copy()
-        working_data["Date"] = pd.to_datetime(working_data["Date"])
-
-        working_data["Date"] = (working_data["Date"] - JULIAN_REFERENCE_START).dt.days
-
-        # This pedantic formatting is required
-        # by the current windows binaries for CeQual-W2
-
+        # cequalw2 requires the file to have a particular header
         buf = StringIO()
         buf.write("$\n\n")
-        working_data.to_csv(buf, index=False)
+        self.data.to_csv(buf, index=False)
 
         with open(filename, "w", encoding="utf-8", newline="") as file:
             file.write(buf.getvalue())
@@ -776,7 +772,7 @@ class TempDataInput(BaseInput):
 
 @dataclass
 class MetDataInput(BaseInput):
-    """A simple parser for the met data input to QualW2."""
+    """A simple parser for metrology data."""
 
     data: pd.DataFrame
     filename: PathLike | str | None = None
@@ -784,16 +780,18 @@ class MetDataInput(BaseInput):
     def set_false_julian_day(self, sim_start: float):
         """Set the start date to be `sim_start` days since `JULIAN_REFERENCE_START`.
 
+        This sets the first entry in the JDAY column to be `sim_start`, then recomputes
+        the `date` column relative to the JULIAN_REFERENCE_START. This is needed when
+        tricking cequalw2 to run against metrology data from years that _aren't_ the
+        same as the historical temperature or flow data.
+
         Parameters
         ----------
         sim_start : int
             The start of the simulation in days since `JULIAN_REFERENCE_START`
         """
-        self.data["date"] = JULIAN_REFERENCE_START + (
-            self.data["date"]
-            - self.data["date"].iloc[0]
-            + pd.to_timedelta(sim_start, "days")
-        )
+        days_since_start = self.data["JDAY"] - self.data["JDAY"].iloc[0]
+        self.data["JDAY"] = sim_start + days_since_start
 
     @classmethod
     def from_file(cls, filename: PathLike | str) -> Self:
@@ -802,23 +800,38 @@ class MetDataInput(BaseInput):
         Parameters
         ----------
         filename : PathLike | str
-            Path to met data directory
+            Path to metrology data file. Should contains the following 8 columns:
+
+                <unnamed date column>
+                JDAY
+                TAIR
+                TDEW
+                WIND
+                PHI
+                CLOUD
+                SRO
+
+            The first column is dropped when parsing; only JDAY is used for the date.
 
         Returns
         -------
         Self
-            A ojbect wrapping the selected year's met data input.
+            Parsed metrology input data
         """
         if Path(filename).suffix != ".csv":
             raise NotImplementedError
 
         df = pd.read_csv(filename)
+        df = df.rename(columns={df.columns[0]: "date"})
         df["date"] = pd.to_datetime(df.iloc[:, 0])
-        df = df[["date"] + df.columns[1:-1].to_list()]
 
+        # Recompute the JDAY in case it isn't referenced to JULIAN_REFERENCE_START
+        # Drop "date" because we refer to all dates by julian day
+        df["JDAY"] = to_fractional_days(df["date"] - JULIAN_REFERENCE_START)
+        cols = ["JDAY"] + [col for col in df.columns if col not in ["JDAY", "date"]]
         return cls(
             filename=filename,
-            data=df,
+            data=df[cols],
         )
 
     def to_file(
@@ -844,15 +857,10 @@ class MetDataInput(BaseInput):
 
         _create_parents_or_fail(path, overwrite, create_parents)
 
-        # Removing the date column so that JDAY is the first column
-        working_data = self.data.iloc[:, 1:]
-
-        # This pedantic formatting is required
-        # by the current windows binaries for CeQual-W2
-
+        # cequalw2 requires the file to have a particular header
         buf = StringIO()
         buf.write("$\n\n")
-        working_data.to_csv(buf, index=False)
+        self.data.to_csv(buf, index=False, float_format="%.2f")
 
         with open(filename, "w", encoding="utf-8", newline="") as file:
             file.write(buf.getvalue())
@@ -1083,3 +1091,23 @@ def _create_parents_or_fail(
                     f"Parent directory {path.parent} does not exist. Aborting. "
                     "To create the parent directory, pass `create_parents=True`."
                 )
+
+
+def to_fractional_days(series: pd.Series) -> pd.Series:
+    """Convert a timedelta64 pd.Series to a floating point fractional day.
+
+    Parameters
+    ----------
+    series : pd.Series
+        Input series of dtype timedelta64
+
+    Returns
+    -------
+    pd.Series
+        The input timedelta, but in fractions of a day (floating point)
+    """
+    if series.dtype.type == np.timedelta64:
+        return series / pd.to_timedelta(1, "days")
+    raise ValueError(
+        f"Cannot convert series of dtype {series.dtype} to fractional days"
+    )

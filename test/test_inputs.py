@@ -5,7 +5,6 @@ import pandas as pd
 import pytest
 
 from pyqualw2.config.inputs import (
-    JULIAN_REFERENCE_START,
     BathymetryInput,
     FlowData,
     MetDataInput,
@@ -20,17 +19,25 @@ def test_read_met_data_from_file(sample_met_2018):
     met_data = MetDataInput.from_file(sample_met_2018)
 
     assert met_data.filename == sample_met_2018
-    assert met_data.data.columns[1] == "JDAY"
+    assert met_data.data.columns[0] == "JDAY"
 
 
 @pytest.mark.parametrize("offset", list(range(10, 1000, 100)))
 def test_set_false_julian_day(sample_met_2018, offset):
-    """Test that the false julian day can be set for the met data."""
+    """Test that the false julian day can be set for the metrology data."""
     met_data = MetDataInput.from_file(sample_met_2018)
     met_data.set_false_julian_day(offset)
-    assert met_data.data["date"].iloc[0] - JULIAN_REFERENCE_START == pd.to_timedelta(
-        offset, "days"
-    )
+    assert met_data.data["JDAY"].iloc[0] == offset
+
+
+def test_write_met_data(sample_met_2018, sample_mmet3, tmp_path):
+    """Test that metrology data can be written to disk."""
+    met_data = MetDataInput.from_file(sample_met_2018)
+    met_data.to_file(tmp_path / "test.csv")
+    df = pd.read_csv(tmp_path / "test.csv", skiprows=2)
+
+    # Only compare the values, not the dates
+    assert df[df.columns[1:]].equals(sample_mmet3[sample_mmet3.columns[1:]])
 
 
 def test_read_temp_data_from_file(sample_temp_2018):

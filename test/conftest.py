@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import pandas as pd
 import pytest
 
 
@@ -16,15 +17,24 @@ def sample_w2_con(sample_data1) -> Path:
 
 
 @pytest.fixture
-def sample_bathymetry(sample_data1) -> Path:
-    """Get the path to an example bathymetry file."""
-    return sample_data1 / "inputs" / "mbth_wb1.csv"
+def sample_inputs(sample_data1) -> Path:
+    """Get the inputs/ directory for sample_data1.
+
+    This contains the actual input files required by cequalw2.
+    """
+    return sample_data1 / "inputs"
 
 
 @pytest.fixture
-def sample_profile(sample_data1) -> Path:
+def sample_bathymetry(sample_inputs) -> Path:
+    """Get the path to an example bathymetry file."""
+    return sample_inputs / "mbth_wb1.csv"
+
+
+@pytest.fixture
+def sample_profile(sample_inputs) -> Path:
     """Get the path to an example profile file."""
-    return sample_data1 / "inputs" / "mvpr1.npt"
+    return sample_inputs / "mvpr1.npt"
 
 
 @pytest.fixture
@@ -46,24 +56,30 @@ def sample_flow_2018(sample_data1) -> Path:
 
 
 @pytest.fixture
-def sample_shade(sample_data1) -> Path:
+def sample_shade(sample_inputs) -> Path:
     """Get the path to an example shade data input file."""
-    return sample_data1 / "inputs" / "mshade.npt"
+    return sample_inputs / "mshade.npt"
 
 
 @pytest.fixture
-def sample_wind_sheltering(sample_data1) -> Path:
+def sample_wind_sheltering(sample_inputs) -> Path:
     """Get the path to an example wind sheltering data input file."""
-    return sample_data1 / "inputs" / "mwsc.npt"
+    return sample_inputs / "mwsc.npt"
 
 
 @pytest.fixture
-def sample_temperature_tributary(sample_data1) -> Path:
+def sample_temperature_tributary(sample_inputs) -> Path:
     """Get the path to an example tributary temperature data input file."""
-    return sample_data1 / "inputs" / "mtdt_br1.npt"
+    return sample_inputs / "mtdt_br1.npt"
 
 
 @pytest.fixture
 def cequalw2_binary() -> Path:
     """Get the path to the cequalw2 binary."""
     return Path(__file__).parent.parent / "cequalw2" / "w2_v45_64.exe"
+
+
+@pytest.fixture
+def sample_mmet3(sample_inputs) -> pd.DataFrame:
+    """Get some example metrology data ready for cequalw2 input."""
+    return pd.read_csv(sample_inputs / "mmet3.csv", skiprows=2)
