@@ -1,4 +1,3 @@
-import datetime
 import re
 import warnings
 from abc import ABC, abstractmethod
@@ -13,7 +12,7 @@ import numpy as np
 import pandas as pd
 from numpy.typing import NDArray
 
-JULIAN_REFERENCE_START = datetime.datetime(1921, 1, 1)
+from ..utils import JULIAN_REFERENCE_START, jday_to_date, to_fractional_days
 
 
 class BaseInput(ABC):
@@ -777,21 +776,22 @@ class MetDataInput(BaseInput):
     data: pd.DataFrame
     filename: PathLike | str | None = None
 
-    def set_false_julian_day(self, sim_start: float):
-        """Set the start date to be `sim_start` days since `JULIAN_REFERENCE_START`.
+    def set_false_julian_year(self, year: int):
+        """Set the year of the metrology data to be the specified year.
 
-        This sets the first entry in the JDAY column to be `sim_start`, then recomputes
-        the `date` column relative to the JULIAN_REFERENCE_START. This is needed when
-        tricking cequalw2 to run against metrology data from years that _aren't_ the
-        same as the historical temperature or flow data.
+        This calculates the difference between the desired year and the current year,
+        then uses a pandas DateOffset to adjust the JDAY the appropriate number of days.
 
         Parameters
         ----------
-        sim_start : int
-            The start of the simulation in days since `JULIAN_REFERENCE_START`
+        year : int
+            Year to set the metrology data to use
         """
-        days_since_start = self.data["JDAY"] - self.data["JDAY"].iloc[0]
-        self.data["JDAY"] = sim_start + days_since_start
+        dates = jday_to_date(self.data["JDAY"])
+
+        # Subtract the difference between the target year and the current year
+        dates = dates + pd.offsets.DateOffset(years=year - dates[0].year)
+        self.data["JDAY"] = to_fractional_days(dates - JULIAN_REFERENCE_START)
 
     @classmethod
     def from_file(cls, filename: PathLike | str) -> Self:
@@ -1098,23 +1098,3 @@ def _create_parents_or_fail(
                     f"Parent directory {path.parent} does not exist. Aborting. "
                     "To create the parent directory, pass `create_parents=True`."
                 )
-
-
-def to_fractional_days(series: pd.Series) -> pd.Series:
-    """Convert a timedelta64 pd.Series to a floating point fractional day.
-
-    Parameters
-    ----------
-    series : pd.Series
-        Input series of dtype timedelta64
-
-    Returns
-    -------
-    pd.Series
-        The input timedelta, but in fractions of a day (floating point)
-    """
-    if series.dtype.type == np.timedelta64:
-        return series / pd.to_timedelta(1, "days")
-    raise ValueError(
-        f"Cannot convert series of dtype {series.dtype} to fractional days"
-    )

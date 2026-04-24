@@ -2,7 +2,9 @@ import shutil
 from os import PathLike
 from pathlib import Path
 from typing import Any, Self
+from uuid import uuid4
 
+from .. import utils
 from .inputs import (
     BathymetryInput,
     FlowData,
@@ -32,6 +34,7 @@ class Config:
         temperature_tributaries: list[NoopInput],
         wind_sheltering: NoopInput,
         cequalw2_path: PathLike,
+        name: str,
     ):
         self.con = con
         self.bathymetry = bathymetry
@@ -48,6 +51,8 @@ class Config:
         self.branch_evaporation = branch_evaporation
 
         self.cequalw2_path = Path(cequalw2_path)
+
+        self.name = name
 
     def parameterize(self, parameters: dict[str, Any]) -> list[Config]:
         """Override settings for each parameter, generating a new set of Configs.
@@ -67,13 +72,16 @@ class Config:
         """
         results = []
 
-        sim_start, _sim_end, _sim_year = self.con.timedata
+        sim_start, _, _ = self.con.timedata
+
+        # Set the metrology data to have the same year as the simulation year
+        sim_year = utils.jday_to_date(sim_start).year
 
         for filename in parameters["met_data"]:
             # Fudge the met data dates so that cequalw2 can simulate scenarios
             # with various metrology data
             met_data = MetDataInput.from_file(filename)
-            met_data.set_false_julian_day(sim_start)
+            met_data.set_false_julian_year(sim_year)
 
             results.append(
                 Config(
@@ -89,6 +97,7 @@ class Config:
                     temperature_tributaries=self.temperature_tributaries,
                     wind_sheltering=self.wind_sheltering,
                     cequalw2_path=self.cequalw2_path,
+                    name=f"{self.name}_{str(uuid4())}",
                 )
             )
         return results
@@ -96,6 +105,7 @@ class Config:
     @classmethod
     def from_files(
         cls,
+        name: str,
         con: PathLike,
         bathymetry: PathLike,
         profile: PathLike,
@@ -118,6 +128,8 @@ class Config:
 
         Parameters
         ----------
+        name : str
+            Name of the configuration; used for labeling simulation output
         con : PathLike
             Path to a qualw2 configuration file, e.g. w2_con.csv
         bathymetry : PathLike
@@ -234,6 +246,7 @@ class Config:
             branch_inflow=inflow,
             branch_outflow=outflow,
             branch_evaporation=evaporation,
+            name=name,
         )
 
     @classmethod

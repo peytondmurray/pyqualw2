@@ -15,30 +15,26 @@ class ModelRunner:
 
     Parameters
     ----------
-    configuration : Config
+    configuration : Config | list[Config]
         The configuration to run the model with.
     output_dir : Path
         The directory to save the output files to.
-    source_dir : Path
-        The directory to read the source files from.
-    run_name : str
-        The name of the run.
     wait_time : int, optional
         The time to wait for the model to finish running, by default 30 seconds.
     """
 
     def __init__(
         self,
-        configuration: Config,
+        configuration: Config | list[Config],
         output_dir: Path,
-        source_dir: Path,
-        run_name: str,
         wait_time: int = 10,
     ):
-        self.config = configuration
+        if isinstance(configuration, Config):
+            self.configs = [configuration]
+        else:
+            self.configs = configuration
+
         self.output_dir = output_dir
-        self.source_dir = source_dir
-        self.run_name = run_name
         self.wait_time = wait_time
 
     def run(self):
@@ -49,18 +45,24 @@ class ModelRunner:
         ValueError
             Raised if the cequalw2 subprocess returned nonzero
         """
-        wd = Path(tempfile.mkdtemp())
-        # Make the outputs directory, otherwise cequalw2 will fail
-        (wd / "outputs").mkdir(exist_ok=True)
+        for config in self.configs:
+            with tempfile.TemporaryDirectory() as tempdir:
+                wd = Path(tempdir)
 
-        self.config.to_directory(wd, overwrite=True)
-        retcode = self.run_model(wd)
-        if retcode is None or retcode == 0:
-            # The subprocess return code is None if it was terminated early (i.e. the
-            # window was still open, as it always is when the simulation completes)
-            self.save_outputs(wd, self.output_dir / self.run_name)
-        else:
-            raise ValueError(f"cequalw2 subprocess returned error code {retcode}")
+                # Make the outputs directory, otherwise cequalw2 will fail
+                (wd / "outputs").mkdir(exist_ok=True)
+
+                config.to_directory(wd, overwrite=True)
+                retcode = self.run_model(wd)
+                if retcode is None or retcode == 0:
+                    # The subprocess return code is None if it was terminated early
+                    # (i.e. the window was still open, as it always is when the
+                    # simulation completes)
+                    self.save_outputs(wd, self.output_dir / config.name)
+                else:
+                    raise ValueError(
+                        f"cequalw2 subprocess returned error code {retcode}"
+                    )
 
     def save_outputs(self, wd: Path, output_dir: Path):
         """Copy the cequalw2-generated outputs to the output directory.

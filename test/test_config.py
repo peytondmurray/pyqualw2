@@ -1,15 +1,20 @@
 from pathlib import Path
 
+import pandas as pd
 import pytest
 
-from pyqualw2 import model_runner
 from pyqualw2.config.config import Config
-from pyqualw2.config.inputs import FlowInput
+from pyqualw2.config.inputs import JULIAN_REFERENCE_START, FlowInput
 
 
-@pytest.mark.e2e
-def test_model_runner(
-    tmp_path,
+@pytest.fixture
+def met_data_files(sample_data1) -> list[str]:
+    """Get a list of met data files."""
+    return [str(p) for p in Path(sample_data1 / "historic_data" / "met_data").iterdir()]
+
+
+def test_parametrize(
+    met_data_files,
     sample_w2_con,
     sample_bathymetry,
     sample_profile,
@@ -21,7 +26,7 @@ def test_model_runner(
     sample_flow_2018,
     cequalw2_binary,
 ):
-    """Test the ModelRunner class."""
+    """Test that Config.parametrize works as intended."""
     config = Config.from_files(
         name="test_name",
         con=sample_w2_con,
@@ -40,8 +45,8 @@ def test_model_runner(
             sample_temp_2018,
             sample_temp_2018,
         ],
-        flow_data=sample_flow_2018,
         wind_sheltering=sample_wind_sheltering,
+        flow_data=sample_flow_2018,
         flow_data_date_col="Date",
         flow_data_inflow_cols=[["Date", "M_IN"]],
         flow_data_outflow_cols=[["Date", "SPL_OUT", "FKC_OUT", "MC_OUT", "SJR_OUT"]],
@@ -64,22 +69,21 @@ def test_model_runner(
         ]
     )
 
-    test_dir = Path(__file__).parent.parent / "test" / "sample_data1"
-    output_dir = tmp_path / "test_name"
-    Runner = model_runner.ModelRunner(config, tmp_path)
-    Runner.run()
+    configs = config.parameterize(parameters={"met_data": met_data_files})
+    start, end, year = config.con.timedata
 
-    # Check that the input files are all there
-    expected = []
-    for file in (test_dir / "inputs").iterdir():
-        expected.append(file.name)
+    names = []
+    for conf in configs:
+        # The w2_con.csv simulation start/stop/year should be the same...
+        assert conf.con.timedata == (start, end, year)
 
-    found = []
-    for file in (output_dir / "inputs").iterdir():
-        found.append(file.name)
+        # ...but the metrology data should be adjusted
+        sim_start_date = JULIAN_REFERENCE_START + pd.to_timedelta(start, "days")
+        assert (
+            JULIAN_REFERENCE_START
+            + pd.to_timedelta(conf.met_data.data["JDAY"].iloc[0], "days")
+        ).year == sim_start_date.year
 
-    assert set(expected) == set(found)
+        names.append(conf.name)
 
-    # Check that there is an outputs directory, and that there are files there
-    assert (output_dir / "outputs").exists()
-    assert len(set((output_dir / "outputs").iterdir())) > 0
+    assert sorted(set(names)) == sorted(names)
