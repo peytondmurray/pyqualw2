@@ -4,6 +4,32 @@ import pandas as pd
 import pytest
 
 
+def pytest_addoption(parser):
+    """Add a new option for running the end-to-end tests."""
+    parser.addoption(
+        "--e2e", action="store_true", default=False, help="run tests including e2e"
+    )
+
+
+def pytest_configure(config):
+    """Add a new pytest marker to identify end-to-end tests."""
+    config.addinivalue_line(
+        "markers",
+        "e2e: mark test as end-to-end tests that will launch cequalw2 in a subprocess",
+    )
+
+
+def pytest_collection_modifyitems(config, items):
+    """Modify pytest to skip e2e tests unless specifically asked to run them."""
+    if config.getoption("--e2e"):
+        return
+
+    skip_e2e = pytest.mark.skip(reason="need --e2e option to run")
+    for item in items:
+        if "e2e" in item.keywords:
+            item.add_marker(skip_e2e)
+
+
 @pytest.fixture
 def sample_data1() -> Path:
     """Get the path to the sample data."""

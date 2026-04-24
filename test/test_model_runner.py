@@ -1,10 +1,13 @@
 from pathlib import Path
 
+import pytest
+
 from pyqualw2 import model_runner
 from pyqualw2.config.config import Config
 from pyqualw2.config.inputs import FlowInput
 
 
+@pytest.mark.e2e
 def test_model_runner(
     tmp_path,
     sample_w2_con,
