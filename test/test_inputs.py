@@ -272,5 +272,5 @@ def test_plot_profile(sample_profile):
     prof.plot_profile(names=["TemperC"])
     prof.plot_profile(names="TDS mgl")
 
-    fig, ax = plt.subplots(1, 1)
+    _, ax = plt.subplots(1, 1)
     prof.plot_profile(names=["TDS mgl", "DO mgl"], ax=ax, linestyle="--")
