@@ -175,3 +175,5 @@ output.pdf
 # pixi environments
 .pixi/*
 !.pixi/config.toml
+
+result_images/

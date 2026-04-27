@@ -1,18 +1,26 @@
 import re
 import warnings
 from abc import ABC, abstractmethod
-from collections.abc import Generator
+from collections.abc import Generator, Iterable
 from dataclasses import dataclass
 from io import StringIO
 from os import PathLike
 from pathlib import Path
 from typing import ClassVar, Self
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 from numpy.typing import NDArray
 
-from ..utils import JULIAN_REFERENCE_START, jday_to_date, to_fractional_days
+from ..utils import (
+    JULIAN_REFERENCE_START,
+    get_path_relative_to_home,
+    jday_to_date,
+    to_fractional_days,
+)
 
 
 class BaseInput(ABC):
@@ -569,6 +577,117 @@ class ProfileInput(BaseInput):
             return "C2"
         else:
             raise NotImplementedError
+
+    def plot_profile(
+        self,
+        names: str | list[str] | None = None,
+        ax: Axes | Iterable[Axes] | None = None,
+        **fmt,
+    ) -> Figure | None:
+        """Plot the profile datasets.
+
+        Parameters
+        ----------
+        names : str | list[str] | None
+            Column name or names to plot. Must be column names found in `self.data`. If
+            None, all columns are plotted
+        ax : Axes | np.typing.NDArray[Axes] | None
+            Axes on which to plot. If a single Axes is given, all columns are plotted
+            on the same axis, using a separate twinned y-axis for each column. If an
+            iterable of axes is given, each axis will contain a separate column. If this
+            is None, a new figure will be generated containing separate axes for each
+            column
+        **fmt
+            Line2D options to pass to each call to `matplotlib.axes.Axes.plot`
+
+        Returns
+        -------
+        Figure | None
+            A Figure if one is generated (i.e. ax=None was passed), otherwise None
+        """
+        if names is None:
+            names = self.data.columns.to_list()
+        elif isinstance(names, str):
+            names = [names]
+
+        default_fmt = {"linestyle": "-", "marker": "o"}
+
+        if self.filename is None:
+            filename = ""
+        else:
+            filename = get_path_relative_to_home(self.filename)
+
+        if ax is None:
+            nplots = len(names)
+            ncols = min(nplots, 3)  # Maximum of 3 columns
+            nrows = int(nplots / ncols + 0.5)  # Round up to get number of rows needed
+
+            fig, ax = plt.subplots(ncols=ncols, nrows=nrows)
+
+            # plt.subplots can return either an Axes or a NDArray[Axes]; we treat them
+            # the same below, so we ensure it's a NDArray[Axes] here.
+            if isinstance(ax, Axes):
+                ax = np.array([ax])
+
+            for i, name in enumerate(names):
+                kw = {"label": name} | default_fmt | fmt
+                axis = ax.flat[i]  # type: ignore
+                axis.plot(self.data[name], self.data.index, **kw)
+                axis.yaxis.set_inverted(True)
+                axis.set_ylabel("Layer")
+                axis.set_xlabel(name)
+                axis.set_title(name)
+
+            fig.suptitle(f"Profile Data: {filename}")
+
+        elif isinstance(ax, Axes):
+            lines = []
+            for i, name in enumerate(names):
+                kw = {"label": name} | default_fmt | fmt
+                if i == 0:
+                    axis = ax
+                else:
+                    axis = ax.twiny()
+
+                    # https://matplotlib.org/stable/gallery/spines/multiple_yaxis_with_spines.html
+                    axis.spines.top.set_position(("axes", 1 + 0.1 * (i - 1)))
+
+                (line,) = axis.plot(self.data[name], self.data.index, f"C{i}", **kw)
+                lines.append(line)
+
+                axis.set_xlabel(name)
+                axis.xaxis.label.set_color(line.get_color())
+                axis.tick_params(axis="x", colors=line.get_color())
+
+            ax.set_ylabel("Layer")
+            ax.yaxis.set_inverted(True)
+
+            # Set the legend on the last axis plotted; otherwise it can fall behind data
+            # points, and isn't draggable. See
+            # https://stackoverflow.com/a/28987970/8100451 for more information.
+            axis.legend(handles=lines, draggable=True)
+            ax.set_title("Profile data")
+            ax.get_figure().suptitle(f"Profile Data: {filename}")
+            fig = None
+
+        else:
+            # This is some iterable of axes to plot on
+            if len(ax) != len(names):  # type: ignore
+                raise ValueError(
+                    f"Unsure how plot {len(names)} profile datasets on "
+                    f"{len(ax)} axes. "  # type: ignore
+                    "Pass a single `Axes` instance to plot all datasets on the same "
+                    "axes, pass `axes=None` to generate a new figure that "
+                    "automatically generates a separate axis for each profile dataset, "
+                    "or pass a list containing the same number of axes as profile "
+                    "datasets to get a single dataset on each axis."
+                )
+            for name, axis in zip(names, ax, strict=True):
+                self.plot_profile(name, axis, **fmt)
+
+            fig = None
+
+        return fig
 
 
 @dataclass

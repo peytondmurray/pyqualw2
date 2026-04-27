@@ -1,10 +1,32 @@
 import datetime
+from os import PathLike
+from pathlib import Path
 from typing import overload
 
 import numpy as np
 import pandas as pd
 
 JULIAN_REFERENCE_START = datetime.datetime(1921, 1, 1)
+
+
+def get_path_relative_to_home(path: PathLike | str) -> str:
+    """Return a path relative to home as a string.
+
+    Parameters
+    ----------
+    path : PathLike | str
+        Path to convert to a relative path
+
+    Returns
+    -------
+    str
+        New path relative to the home directory, if possible; otherwise,
+        return the original path
+    """
+    try:
+        return f"~/{Path(path).relative_to(Path.home())}"
+    except ValueError:
+        return str(path)
 
 
 @overload
