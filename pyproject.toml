@@ -24,7 +24,11 @@ dev = [
     "python-lsp-server",
 ]
 test = [
-    "pytest"
+    "pytest",
+]
+notebook = [
+    "jupyterlab>=4.5.6",
+    "ipympl>=0.10.0",
 ]
 
 [tool.pytest]

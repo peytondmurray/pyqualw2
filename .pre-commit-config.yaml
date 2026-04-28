@@ -21,6 +21,10 @@ repos:
     rev: v0.14.10
     hooks:
       - id: ruff-check
+        exclude: |
+          (?x)^(
+            .*\.ipynb
+          )
       - id: ruff-format
   - repo: https://github.com/pre-commit/pygrep-hooks
     rev: v1.10.0
@@ -34,3 +38,7 @@ repos:
     rev: v1.19.1
     hooks:
         - id: mypy
+  - repo: https://github.com/deshaw/nbstripout-fast
+    rev: v1.1.2
+    hooks:
+      - id: nbstripout-fast

@@ -177,3 +177,7 @@ output.pdf
 !.pixi/config.toml
 
 result_images/
+
+.virtual_documents/
+.ipynb_checkpoints/
+notebooks/simple_simulation/

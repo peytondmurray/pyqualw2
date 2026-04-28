@@ -77,3 +77,34 @@ prek install
 
 to install the pre-commit hooks. Read more about pre-commit hooks on the [`prek`
 github page](https://github.com/j178/prek).
+
+## Testing
+
+To run tests, install the `test` dependency group:
+
+```bash
+pip install -e '.[test]'
+```
+
+Then run tests by calling `pytest` from the root of the repository. If you want
+to run end-to-end tests as well, run `pytest --e2e`; requires Wine if you're on
+Linux.
+
+## Jupyter Notebooks
+
+Some example notebooks are provided in `notebooks/`. To use them, install the
+`notebook` dependency group:
+
+```bash
+pip install -e '.[notebook]'
+```
+
+and then start JupyterLab with
+
+```bash
+jupyter lab
+```
+
+See the [JupyterLab
+docs](https://jupyterlab.readthedocs.io/en/stable/index.html) for more
+information.

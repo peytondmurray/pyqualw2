@@ -326,4 +326,6 @@ class Config:
 
         # Write the cequalw2 binary to the directory, since it needs to be in the same
         # directory as the data to work (paths are hardcoded in fortran...)
-        shutil.copy(self.cequalw2_path, working_directory / self.cequalw2_path.name)
+        shutil.copy(
+            self.cequalw2_path.resolve(), working_directory / self.cequalw2_path.name
+        )
