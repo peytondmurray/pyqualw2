@@ -4,7 +4,7 @@ import pytest
 from matplotlib.testing.decorators import image_comparison
 from numpy.testing import assert_equal
 
-from pyqualw2.outputs import QWO, QWOLayers
+from pyqualw2.outputs import QWO, TWO, QWOLayers
 
 
 @pytest.fixture
@@ -23,6 +23,12 @@ def sample_qwo_layers(sample_outputs) -> Path:
 def sample_qwo(sample_outputs) -> Path:
     """Get the path to the total output flow data."""
     return sample_outputs / "qwo_31.csv"
+
+
+@pytest.fixture
+def sample_two(sample_outputs) -> Path:
+    """Get the path to the temperature data."""
+    return sample_outputs / "two_31.csv"
 
 
 def test_QWO(sample_qwo):
@@ -61,3 +67,21 @@ def test_QWOLayers(sample_qwo_layers):
     assert_equal(
         flow_layer_208.to_numpy(), layers.data[["JDAY", "flow_layer_208 [m^3/s]"]]
     )
+
+
+@image_comparison(
+    baseline_images=[
+        "two_plot1",
+        "two_plot2",
+        "two_plot3",
+        "two_plot4",
+    ],
+    remove_text=True,
+    extensions=["png"],
+    style="mpl20",
+)
+def test_TWO_plot(sample_two):
+    """Test that the TWO class produces a valid plot."""
+    two = TWO.from_file(sample_two)
+    for i in range(1, 5):
+        two.plot_structure(i)

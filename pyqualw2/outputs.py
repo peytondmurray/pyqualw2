@@ -133,7 +133,7 @@ class QWOLayers(OutputBase):
             A DataFrame containing the timestamp and flow for the requested layer
         """
         if layer < 2 or layer > self.n_layers + 1:
-            raise TypeError(
+            raise ValueError(
                 f"Cannot get layer flow for layer {layer}. Valid layer "
                 f"numbers are in the range [2, {self.n_layers})"
             )
@@ -202,5 +202,107 @@ class QWOLayers(OutputBase):
         ax.set_xlabel("Date")
         ax.set_ylabel("Layer")
         ax.yaxis.set_inverted(True)
+
+        return fig  # ty:ignore[invalid-return-type]
+
+
+@dataclass
+class TWO(OutputBase):
+    """A container for TWO temperature data for each structure."""
+
+    header: str
+    data: pd.DataFrame
+    filename: PathLike | str | None = None
+
+    def __post_init__(self):
+        # JDAY and T [C] aren't structure-specific temperature columns
+        self.n_structures = self.data.shape[1] - 2
+
+    @classmethod
+    def from_file(cls, filename: PathLike | str) -> Self:
+        """Load a TWO file containing temperature data for each structure.
+
+        Parameters
+        ----------
+        filename : PathLike | str
+            File to load
+
+        Returns
+        -------
+        Self
+            An object containing the temperature of the water in each structure
+        """
+        with open(filename) as f:
+            lines = f.readlines()
+
+        df = pd.read_csv(
+            StringIO("\n".join(lines[3:])),
+            header=None,
+        ).dropna(axis="columns", how="all")
+
+        cols = ["JDAY", "T [C]"]
+        for i, _ in enumerate(df.columns[2:], start=1):
+            cols.append(f"temperature_structure_{i} [C]")
+
+        df.columns = cols
+        return cls(
+            filename=Path(filename),
+            header="\n".join(lines[:2]),
+            data=df,
+        )
+
+    def get_structure(self, structure: int) -> pd.DataFrame:
+        """Get the timeseries temperature data for the given structure.
+
+        Parameters
+        ----------
+        structure : int
+            Structure number to get the temperature of
+
+        Returns
+        -------
+        pd.DataFrame
+            A DataFrame containing two columns:
+
+                JDAY
+                Temperature [C]
+        """
+        if structure < 1 or structure > self.n_structures + 1:
+            raise ValueError(
+                "Cannot get temperature of flow in structure {structure}. Valid "
+                f"structure numbers are in the range [1, {self.n_structures})"
+            )
+
+        col = f"temperature_structure_{structure} [C]"
+        return self.data[["JDAY", col]].rename(columns={col: "Temperature [C]"})
+
+    def plot_structure(self, structure: int, ax: Axes | None = None, **kw) -> Figure:
+        """Plot the temperature of the given structure.
+
+        Parameters
+        ----------
+        structure : int
+            Structure to plot temperature of
+        ax : Axes | None
+            Axes on which to plot the temperature. If None, a new figure is generated
+        **kw
+            Other keyword arguments to pass to `ax.plot`
+
+        Returns
+        -------
+        Figure
+            Figure on which the plot has been made
+
+        """
+        if ax is None:
+            fig, ax = plt.subplots(1, 1)
+        else:
+            fig = ax.get_figure()
+
+        df = self.get_structure(structure)
+
+        ax.plot(jday_to_date(df["JDAY"]), df["Temperature [C]"], **kw)
+        ax.set_xlabel("Date")
+        ax.set_ylabel("Temperature [C]")
 
         return fig  # ty:ignore[invalid-return-type]
