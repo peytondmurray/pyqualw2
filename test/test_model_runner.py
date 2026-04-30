@@ -7,9 +7,8 @@ from pyqualw2.config.config import Config
 from pyqualw2.config.inputs import FlowInput
 
 
-@pytest.mark.e2e
-def test_model_runner(
-    tmp_path,
+@pytest.fixture
+def sample_config(
     sample_w2_con,
     sample_bathymetry,
     sample_profile,
@@ -20,8 +19,8 @@ def test_model_runner(
     sample_met_2018,
     sample_flow_2018,
     cequalw2_binary,
-):
-    """Test the ModelRunner class."""
+) -> Config:
+    """Generate a sample Config class using existing data."""
     config = Config.from_files(
         name="test_name",
         con=sample_w2_con,
@@ -64,9 +63,15 @@ def test_model_runner(
         ]
     )
 
+    return config
+
+
+@pytest.mark.e2e
+def test_model_runner(tmp_path, sample_config):
+    """Test the ModelRunner class."""
     test_dir = Path(__file__).parent.parent / "test" / "sample_data1"
-    output_dir = tmp_path / "test_name"
-    Runner = model_runner.ModelRunner(config, tmp_path)
+    result_dir = tmp_path / "test_name"
+    Runner = model_runner.ModelRunner(sample_config, tmp_path)
     Runner.run()
 
     # Check that the input files are all there
@@ -75,11 +80,32 @@ def test_model_runner(
         expected.append(file.name)
 
     found = []
-    for file in (output_dir / "inputs").iterdir():
+    file_modified_times = {}
+    for file in (result_dir / "inputs").iterdir():
+        file_modified_times[file.name] = file.stat().st_mtime
         found.append(file.name)
 
     assert set(expected) == set(found)
 
     # Check that there is an outputs directory, and that there are files there
-    assert (output_dir / "outputs").exists()
-    assert len(set((output_dir / "outputs").iterdir())) > 0
+    assert (result_dir / "outputs").exists()
+    assert len(set((result_dir / "outputs").iterdir())) > 0
+
+    # Test that this fails when the output files already exist
+    with pytest.raises(FileExistsError):
+        Runner.run(overwrite=False)
+
+    # Check that overwriting the result directory works, i.e. the files are actually
+    # being replaced (verified by checking the file modified time of everything in
+    # inputs/).
+    Runner.run(overwrite=True)
+    found = []
+    for file in (result_dir / "inputs").iterdir():
+        assert file.stat().st_mtime > file_modified_times[file.name]
+        found.append(file.name)
+
+    assert set(expected) == set(found)
+
+    # Check that there is an outputs directory, and that there are files there
+    assert (result_dir / "outputs").exists()
+    assert len(set((result_dir / "outputs").iterdir())) > 0

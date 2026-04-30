@@ -37,8 +37,14 @@ class ModelRunner:
         self.output_dir = output_dir
         self.wait_time = wait_time
 
-    def run(self):
+    def run(self, overwrite: bool = False):
         """Run the model for each configuration in the list.
+
+        Parameters
+        ----------
+        overwrite : bool
+            If True, overwrite the output directory; if False and the output directory
+            already exists, an error will be thrown
 
         Raises
         ------
@@ -58,14 +64,30 @@ class ModelRunner:
                     # The subprocess return code is None if it was terminated early
                     # (i.e. the window was still open, as it always is when the
                     # simulation completes)
-                    self.save_outputs(wd, self.output_dir / config.name)
+                    self.save_outputs(
+                        wd,
+                        self.output_dir / config.name,
+                        overwrite=overwrite,
+                    )
                 else:
                     raise ValueError(
                         f"cequalw2 subprocess returned error code {retcode}"
                     )
 
-    def save_outputs(self, wd: Path, output_dir: Path):
+    def save_outputs(self, wd: Path, output_dir: Path, overwrite: bool = False):
         """Copy the cequalw2-generated outputs to the output directory.
+
+        We don't use `Path.copy()` here because
+
+        - We need to check whether the output_dir contains any files that would be
+          overwritten
+        - We could just do `shutil.rmtree(output_dir)` to ensure no files exist where we
+          would like to copy the simulation output to, but that would delete e.g. your
+          home directory if you pass $HOME as the output_dir
+
+        Instead, get the list of files to copy over. Check if any exist and raise an
+        error if the user has not passed `overwrite=True`. Then proceed to copy each
+        file, deleting any existing file if any exists and `overwrite=True`
 
         Parameters
         ----------
@@ -73,12 +95,36 @@ class ModelRunner:
             Working directory where cequalw2 is run
         output_dir : Path
             Directory where the user has asked for results to be placed
+        overwrite : bool
+            If True, overwrite the output directory; if False and the output directory
+            already exists, an error will be thrown
+
+        Raises
+        ------
+        FileExistsError
+            Raised if `overwrite=False` is passed and the `output_dir` already contains
+            files that would be overwritten by simulation output
         """
         if not output_dir.exists():
             output_dir.mkdir(parents=True)
 
-        for file in wd.iterdir():
-            file.copy(output_dir / file.name, preserve_metadata=True)
+        copy_from = [f for f in wd.glob("**/*") if f.is_file()]
+        copy_to = [output_dir / f.relative_to(wd) for f in copy_from]
+
+        if not overwrite and any([f.exists() for f in copy_to]):
+            raise FileExistsError(
+                f"Cannot save output to {output_dir}: files would be overwritten. "
+                "To overwrite existing output, call `ModelRunner.run(overwrite=True)`."
+            )
+
+        for f_from, f_to in zip(copy_from, copy_to, strict=True):
+            if not f_to.parent.exists():
+                f_to.parent.mkdir(parents=True, exist_ok=True)
+
+            if f_to.exists() and overwrite:
+                f_to.unlink()
+
+            f_from.copy(f_to)
 
     def run_model(self, wd: Path) -> int:
         """Run the cequalw2 binary in a subprocess.
