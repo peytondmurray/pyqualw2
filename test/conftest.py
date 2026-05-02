@@ -127,3 +127,9 @@ def sample_mqot_br1(sample_inputs) -> pd.DataFrame:
 def sample_mqdt_br1(sample_inputs) -> pd.DataFrame:
     """Get some example cequalw2 evaporation input data."""
     return pd.read_csv(sample_inputs / "mqdt_br1.csv", skiprows=2)
+
+
+@pytest.fixture
+def multi_run_result() -> Path:
+    """Get a path to a directory with 3 separate runs."""
+    return Path(__file__).parent / "sample_multi_run"

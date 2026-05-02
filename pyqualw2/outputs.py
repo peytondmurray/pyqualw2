@@ -1,3 +1,6 @@
+import functools
+import logging
+import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from io import StringIO
@@ -14,6 +17,8 @@ from matplotlib.figure import Figure
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from pyqualw2.utils import jday_to_date
+
+log = logging.getLogger(__name__)
 
 
 class OutputBase(ABC):
@@ -305,4 +310,219 @@ class TWO(OutputBase):
         ax.set_xlabel("Date")
         ax.set_ylabel("Temperature [C]")
 
+        return fig  # ty:ignore[invalid-return-type]
+
+
+@functools.total_ordering
+class RunResult:
+    """A container which holds the results of a single cequalw2 run."""
+
+    @staticmethod
+    def _find_two_file(path: PathLike | str) -> Path:
+        path = Path(path)
+        for file in (path / "outputs").iterdir():
+            if re.match(r"two_\d+.csv", file.name):
+                return file
+        raise ValueError(f"Cannot find a TWO file in {str(path)}.")
+
+    def __init__(self, path: PathLike | str):
+        self.path = Path(path)
+        self.two = TWO.from_file(self._find_two_file(path))
+        self.name = self.path.name
+
+    def plot_two_structure(
+        self,
+        structure: int,
+        ax: Axes | None = None,
+        **kw,
+    ) -> Figure:
+        """Plot the temperature of the output at the given structure.
+
+        Parameters
+        ----------
+        structure : int
+            Structure for which the temperature should be plotted
+        ax : Axes | None
+            Axes to plot on. If None, a new figure is generated
+        **kw
+            Additional kwargs are passed to TWO.plot_structure
+
+        Returns
+        -------
+        Figure
+            The figure containing the axes where the data was plotted
+        """
+        return self.two.plot_structure(structure, ax, **kw)
+
+    def __ge__(self, other):  # noqa: ANN001
+        return self.name >= other.name
+
+    def __eq__(self, other):  # noqa: ANN001
+        return self.name == other.name
+
+
+class MultiRunResult:
+    """Class which manipulates outputs for multiple simulation runs."""
+
+    def __init__(self, path: PathLike | str):
+        self.path = Path(path)
+        self.runs: list[RunResult] = []
+
+        # Sort the run directories so that different platforms generate the same
+        # MultiRunResult when run on the same data (iterdir has no guarantee of
+        # ordering)
+        for item in sorted(self.path.iterdir()):
+            if item.is_dir():
+                self.runs.append(RunResult(item))
+
+    def plot_two_structure(
+        self,
+        structure: int,
+        ax: Axes | None = None,
+        **kw,
+    ) -> Figure:
+        """Plot the temperature of the output at the given structure for all runs.
+
+        Parameters
+        ----------
+        structure : int
+            Structure for which the temperature should be plotted
+        ax : Axes | None
+            Axes to plot on. If None, a new figure is generated
+        **kw
+            Additional kwargs are passed to TWO.plot_structure
+
+        Returns
+        -------
+        Figure
+            The figure containing the axes where the data was plotted
+        """
+        if ax is None:
+            fig, ax = plt.subplots(1, 1)
+        else:
+            fig = ax.get_figure()
+
+        for run in self.runs:
+            run.plot_two_structure(structure, ax, **kw)
+
+        return fig  # ty:ignore[invalid-return-type]
+
+    def get_two_structure(self, structure: int) -> pd.DataFrame:
+        """Get the temperature data for the given structure for all runs.
+
+        Normally, cequalw2 does not produce the same timestamps for temperature time
+        series for different runs. This function linearly interpolates the temperature
+        of each run across a new JDAY linspace, with start, stop, and step using the
+        first run's JDAY as reference. This makes the temperatures at each timestep
+        directly comparable.
+
+        Parameters
+        ----------
+        structure : int
+            Structure for which the data should be retrieved
+
+        Returns
+        -------
+        pd.DataFrame
+            Interpolated time series temperature data for the given structure
+        """
+        already_warned = False
+        data = {}
+
+        for run in self.runs:
+            df = run.two.get_structure(structure)
+
+            if "JDAY" not in data:
+                jday = df["JDAY"].to_numpy()
+                data["JDAY"] = np.linspace(jday.min(), jday.max(), len(jday))
+            else:
+                if (
+                    (df["JDAY"].max() > data["JDAY"].max())
+                    or (df["JDAY"].min() < data["JDAY"].min())
+                    and not already_warned
+                ):
+                    range_data = [float(data["JDAY"].min()), float(data["JDAY"].max())]
+                    range_df = [float(df["JDAY"].min()), float(df["JDAY"].max())]
+                    log.warning(
+                        f"Comparing temperature data for structure {structure}; one "
+                        "dataset has bounds outside another, meaning that the "
+                        "interpolated date will have artefacts at the edge of the "
+                        f"combined dataset. Interpolated JDAY: ({range_data}), this "
+                        f"dataset: ({range_df})"
+                    )
+                    already_warned = True
+
+            data[f"Temperature ({run.name}) [C]"] = np.interp(
+                data["JDAY"], df["JDAY"], df["Temperature [C]"]
+            )
+
+        return pd.DataFrame(data=data)
+
+    def plot_two_structure_composite(
+        self,
+        structure: int,
+        ax: Axes | None = None,
+        fill_kw: dict | None = None,
+        tavg_kw: dict | None = None,
+    ) -> Figure:
+        """Plot the average temperature of a structure vs time over multiple runs.
+
+        The min and max temperature at any given timestep is represented with a shaded
+        region.
+
+        Parameters
+        ----------
+        structure : int
+            Structure for which the temperature should be plotted
+        ax : Axes | None
+            Axes on which to plot. If this is None, a new figure is generated
+        fill_kw : dict | None
+            Additional keyword arguments to pass to the fill_between function
+        tavg_kw : dict | None
+            Additional keyword arguments to pass to the average temperature plot call
+
+        Returns
+        -------
+        Figure
+            The figure on which the data was plotted
+        """
+        if ax is None:
+            fig, ax = plt.subplots(1, 1)
+        else:
+            fig = ax.get_figure()
+
+        df = self.get_two_structure(structure)
+
+        temperature_cols = df.columns[1:]
+
+        df["Tmax [C]"] = df[temperature_cols].max(axis="columns")
+        df["Tmin [C]"] = df[temperature_cols].min(axis="columns")
+        df["Tavg [C]"] = df[temperature_cols].mean(axis="columns")
+
+        date = jday_to_date(df["JDAY"])
+
+        if fill_kw is None:
+            fill_kw = {}
+        fill_kw = {"alpha": 0.6} | fill_kw
+
+        if tavg_kw is None:
+            tavg_kw = {}
+        tavg_kw = {"color": "k"} | tavg_kw
+
+        ax.fill_between(
+            date,
+            df["Tmin [C]"],
+            df["Tmax [C]"],
+            label="Temperature Range [C]",
+            **fill_kw,
+        )
+        ax.plot(
+            date,
+            df["Tavg [C]"],
+            label="Tavg",
+            **tavg_kw,
+        )
+
+        ax.set_xlabel("Date")
+        ax.set_ylabel("Temperature [C]")
         return fig  # ty:ignore[invalid-return-type]

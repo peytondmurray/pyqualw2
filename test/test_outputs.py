@@ -4,7 +4,7 @@ import pytest
 from matplotlib.testing.decorators import image_comparison
 from numpy.testing import assert_equal
 
-from pyqualw2.outputs import QWO, TWO, QWOLayers
+from pyqualw2.outputs import QWO, TWO, MultiRunResult, QWOLayers
 
 
 @pytest.fixture
@@ -85,3 +85,17 @@ def test_TWO_plot(sample_two):
     two = TWO.from_file(sample_two)
     for i in range(1, 5):
         two.plot_structure(i)
+
+
+@image_comparison(
+    baseline_images=[
+        "multirun_composite",
+    ],
+    remove_text=True,
+    extensions=["png"],
+    style="mpl20",
+)
+def test_multirun_composite_structure(multi_run_result):
+    """Test that plotting multi-run TWO structure works."""
+    res = MultiRunResult(multi_run_result)
+    res.plot_two_structure_composite(4)

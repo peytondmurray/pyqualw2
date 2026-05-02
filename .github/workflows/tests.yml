@@ -35,3 +35,11 @@ jobs:
       - name: Run tests
         run: |
           pytest --e2e
+
+      - name: Upload matplotlib test plots if tests fail
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: result-images
+          path: result_images/
+          if-no-files-found: ignore
