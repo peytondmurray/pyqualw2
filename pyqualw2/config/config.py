@@ -2,7 +2,6 @@ import shutil
 from os import PathLike
 from pathlib import Path
 from typing import Any, Self
-from uuid import uuid4
 
 from .. import utils
 from .inputs import (
@@ -97,7 +96,7 @@ class Config:
                     temperature_tributaries=self.temperature_tributaries,
                     wind_sheltering=self.wind_sheltering,
                     cequalw2_path=self.cequalw2_path,
-                    name=f"{self.name}_{str(uuid4())}",
+                    name=f"{self.name}_met{met_data.original_year}",
                 )
             )
         return results

@@ -893,6 +893,7 @@ class MetDataInput(BaseInput):
     """A simple parser for metrology data."""
 
     data: pd.DataFrame
+    original_year: int
     filename: PathLike | str | None = None
 
     def set_false_julian_year(self, year: int):
@@ -944,14 +945,26 @@ class MetDataInput(BaseInput):
         df = df.rename(columns={df.columns[0]: "date"})
         df["date"] = pd.to_datetime(df.iloc[:, 0])
 
+        original_year = cls._parse_filename_year(filename)
+
         # Recompute the JDAY in case it isn't referenced to JULIAN_REFERENCE_START
         # Drop "date" because we refer to all dates by julian day
         df["JDAY"] = to_fractional_days(df["date"] - JULIAN_REFERENCE_START)
         cols = ["JDAY"] + [col for col in df.columns if col not in ["JDAY", "date"]]
         return cls(
-            filename=filename,
             data=df[cols],
+            original_year=original_year,
+            filename=filename,
         )
+
+    @staticmethod
+    def _parse_filename_year(fname: PathLike | str) -> int:
+        file = Path(fname).name
+        match = re.match(r"^(?P<year>\d{4})_.*.csv$", file)
+        if match:
+            return int(match.group("year"))
+
+        raise ValueError(f"Unable to parse year from filename: {file}")
 
     def to_file(
         self,
