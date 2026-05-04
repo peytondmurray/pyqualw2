@@ -1,5 +1,6 @@
 import logging
 import os
+import platform
 import subprocess
 import tempfile
 import time
@@ -153,6 +154,10 @@ class ModelRunner:
         # List of output files to monitor
         output_files = ["two_31.csv", "qwo_31.csv", "tsr_1_seg31.csv"]
 
+        # Flag to indicate if the simulation is idle and should be killed
+        # needed for windows to handle clean-up of tmp directories
+        idle_kill_flag = False
+
         last_access = time.time()
         process = subprocess.Popen(
             cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=str(wd)
@@ -187,9 +192,13 @@ class ModelRunner:
 
             if time.time() - last_access > self.wait_time:
                 process.kill()
+                idle_kill_flag = True
                 break
 
             time.sleep(self.wait_time * 0.1)
+
+        if platform.system() == "Windows":
+            process.wait()
 
         # Subprocess is terminated; flush output
         out = process.stdout.readline()
@@ -199,4 +208,7 @@ class ModelRunner:
         if err:
             log.error(f"[Process {process.pid}]: {err!r}")
 
-        return process.returncode
+        if idle_kill_flag:
+            return 0
+        else:
+            return process.returncode
