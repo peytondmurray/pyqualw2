@@ -99,3 +99,22 @@ def test_multirun_composite_structure(multi_run_result):
     """Test that plotting multi-run TWO structure works."""
     res = MultiRunResult(multi_run_result)
     res.plot_two_structure_composite(4)
+
+
+def test_multirun_result_days_above_threshold(multi_run_result):
+    """Test that a MultiRunResult can produce a dict of the days above a threshold."""
+    res = MultiRunResult(multi_run_result)
+    ndays = res.get_days_above_threshold(4)
+    assert "Tmax [C]" in ndays
+    assert "Tmin [C]" in ndays
+    assert "Tavg [C]" in ndays
+
+
+def test_multirun_get_two_structure_composite_data(multi_run_result):
+    """Test that a MultiRunResult can produce a dict of the days above a threshold."""
+    res = MultiRunResult(multi_run_result)
+    data, stats = res.get_two_structure_composite_data(4)
+
+    assert "JDAY" in data.columns
+    assert len(data.columns) == len(res.runs) + 1
+    assert {"Tmax [C]", "Tavg [C]", "Tmin [C]"} < set(stats.columns)

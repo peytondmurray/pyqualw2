@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from io import StringIO
 from os import PathLike
 from pathlib import Path
+from textwrap import indent
 from typing import Self
 
 import matplotlib.pyplot as plt
@@ -14,6 +15,7 @@ import pandas as pd
 import scipy.interpolate as si
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+from matplotlib.lines import Line2D
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from pyqualw2.utils import jday_to_date
@@ -330,35 +332,14 @@ class RunResult:
         self.two = TWO.from_file(self._find_two_file(path))
         self.name = self.path.name
 
-    def plot_two_structure(
-        self,
-        structure: int,
-        ax: Axes | None = None,
-        **kw,
-    ) -> Figure:
-        """Plot the temperature of the output at the given structure.
-
-        Parameters
-        ----------
-        structure : int
-            Structure for which the temperature should be plotted
-        ax : Axes | None
-            Axes to plot on. If None, a new figure is generated
-        **kw
-            Additional kwargs are passed to TWO.plot_structure
-
-        Returns
-        -------
-        Figure
-            The figure containing the axes where the data was plotted
-        """
-        return self.two.plot_structure(structure, ax, **kw)
-
     def __ge__(self, other):  # noqa: ANN001
         return self.name >= other.name
 
     def __eq__(self, other):  # noqa: ANN001
         return self.name == other.name
+
+    def __str__(self):
+        return f"<RunResult name={self.name}>"
 
 
 class MultiRunResult:
@@ -403,28 +384,28 @@ class MultiRunResult:
             fig = ax.get_figure()
 
         for run in self.runs:
-            run.plot_two_structure(structure, ax, **kw)
+            run.two.plot_structure(structure, ax, **kw)
 
         return fig  # ty:ignore[invalid-return-type]
 
-    def get_two_structure(self, structure: int) -> pd.DataFrame:
-        """Get the temperature data for the given structure for all runs.
-
-        Normally, cequalw2 does not produce the same timestamps for temperature time
-        series for different runs. This function linearly interpolates the temperature
-        of each run across a new JDAY linspace, with start, stop, and step using the
-        first run's JDAY as reference. This makes the temperatures at each timestep
-        directly comparable.
+    def get_two_structure_composite_data(
+        self,
+        structure: int,
+    ) -> tuple[pd.DataFrame, pd.DataFrame]:
+        """Get the TWO data from all runs, and some associated descriptive statistics.
 
         Parameters
         ----------
         structure : int
-            Structure for which the data should be retrieved
+            Output structure to analyze
 
         Returns
         -------
-        pd.DataFrame
-            Interpolated time series temperature data for the given structure
+        tuple[pd.DataFrame, pd.DataFrame]
+            The TWO data for each run interpolated to have the same timestamps, and a
+            set of descriptive statistics for that data. The descriptive statistics
+            include the average, min, and max temperature across all runs for each
+            timestep.
         """
         already_warned = False
         data = {}
@@ -456,7 +437,47 @@ class MultiRunResult:
                 data["JDAY"], df["JDAY"], df["Temperature [C]"]
             )
 
-        return pd.DataFrame(data=data)
+        df = pd.DataFrame(data=data)
+
+        stats = {"JDAY": df["JDAY"]}
+        temperature_cols = [col for col in df.columns if col != "JDAY"]
+        stats["Tmax [C]"] = df[temperature_cols].max(axis="columns")
+        stats["Tmin [C]"] = df[temperature_cols].min(axis="columns")
+        stats["Tavg [C]"] = df[temperature_cols].mean(axis="columns")
+
+        return df, pd.DataFrame(stats)
+
+    def get_days_above_threshold(
+        self, structure: int, threshold: float = 14.44
+    ) -> dict[str, float]:
+        """Calculate the number of days above the given threshold temperature.
+
+        Parameters
+        ----------
+        threshold : float
+            Temperature threshold
+
+        Returns
+        -------
+        dict[str, float]
+            A dict containing three keys:
+
+                Tmax [C]
+                Tmin [C]
+                Tavg [C]
+
+            with each corresponding value being the number of days above the threshold
+            for the given composite quantity
+        """
+        _, stats = self.get_two_structure_composite_data(structure)
+
+        ndays = {}
+        for col in ["Tmax [C]", "Tmin [C]", "Tavg [C]"]:
+            # Read as "Sum up the timesteps where the given column is greater than or
+            # equal to the threshold"
+            ndays[col] = float(stats["JDAY"].diff().loc[stats[col] >= threshold].sum())
+
+        return ndays
 
     def plot_two_structure_composite(
         self,
@@ -464,7 +485,7 @@ class MultiRunResult:
         ax: Axes | None = None,
         fill_kw: dict | None = None,
         tavg_kw: dict | None = None,
-    ) -> Figure:
+    ) -> tuple[Figure, Axes, Line2D, Line2D]:
         """Plot the average temperature of a structure vs time over multiple runs.
 
         The min and max temperature at any given timestep is represented with a shaded
@@ -483,22 +504,17 @@ class MultiRunResult:
 
         Returns
         -------
-        Figure
-            The figure on which the data was plotted
+        tuple[Figure, Axes, Line2D, Line2D]
+            The figure on which the data was plotted, the axes on which the data was
+            plotted, the filled region indicating the min and max temperature, and the
+            average temperature
         """
         if ax is None:
             fig, ax = plt.subplots(1, 1)
         else:
             fig = ax.get_figure()
 
-        df = self.get_two_structure(structure)
-
-        temperature_cols = df.columns[1:]
-
-        df["Tmax [C]"] = df[temperature_cols].max(axis="columns")
-        df["Tmin [C]"] = df[temperature_cols].min(axis="columns")
-        df["Tavg [C]"] = df[temperature_cols].mean(axis="columns")
-
+        df, stats = self.get_two_structure_composite_data(structure)
         date = jday_to_date(df["JDAY"])
 
         if fill_kw is None:
@@ -509,20 +525,46 @@ class MultiRunResult:
             tavg_kw = {}
         tavg_kw = {"color": "k"} | tavg_kw
 
-        ax.fill_between(
+        region = ax.fill_between(
             date,
-            df["Tmin [C]"],
-            df["Tmax [C]"],
-            label="Temperature Range [C]",
+            stats["Tmin [C]"],
+            stats["Tmax [C]"],
+            label="Temperature Range",
             **fill_kw,
         )
-        ax.plot(
+        (line,) = ax.plot(
             date,
-            df["Tavg [C]"],
+            stats["Tavg [C]"],
             label="Tavg",
             **tavg_kw,
         )
 
         ax.set_xlabel("Date")
         ax.set_ylabel("Temperature [C]")
-        return fig  # ty:ignore[invalid-return-type]
+        return fig, ax, region, line  # ty:ignore[invalid-return-type]
+
+    def plot_threshold_line_y(self, ax: Axes, y: float = 14.44, **kw) -> Line2D:
+        """Add a horizontal line to a set of Axes.
+
+        Used on temperature plots for indicating the critical threshold water
+        temperature.
+
+        Parameters
+        ----------
+        ax : Axes
+            Axes on which the line is to be plot
+        y : float
+            Y-value of the line
+        **kw
+            Additional keyword arguments to pass to axhline
+
+        Returns
+        -------
+        Line2D
+            Line object drawn on the axes
+        """
+        return ax.axhline(y=y, **kw)
+
+    def _repr_pretty_(self, p, _):  # noqa: ANN001
+        run_strings = indent(",\n".join([str(run) for run in self.runs]), prefix="  ")
+        p.text(f"<MultiRunResult runs=[\n{run_strings}\n]>\n")
