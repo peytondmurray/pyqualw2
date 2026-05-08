@@ -8,7 +8,7 @@ app = typer.Typer()
 
 model_directory = ""
 
-model_file_dictionary = {}
+model_file_dictionary: dict[str, Path] = {}
 
 
 @app.command()

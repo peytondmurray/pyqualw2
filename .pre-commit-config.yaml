@@ -8,7 +8,7 @@ default_language_version:
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v6.0.0
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # frozen: v6.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -18,7 +18,7 @@ repos:
       - id: check-toml
       - id: mixed-line-ending
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.10
+    rev: 6fec9b7edb08fd9989088709d864a7826dc74e80  # frozen: v0.15.12
     hooks:
       - id: ruff-check
         exclude: |
@@ -27,7 +27,7 @@ repos:
           )
       - id: ruff-format
   - repo: https://github.com/pre-commit/pygrep-hooks
-    rev: v1.10.0
+    rev: 3a6eb0fadf60b3cccfd80bad9dbb6fae7e47b316  # frozen: v1.10.0
     hooks:
       - id: rst-backticks
       - id: rst-directive-colons
@@ -35,10 +35,10 @@ repos:
       - id: python-no-log-warn
       - id: python-check-mock-methods
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.19.1
+    rev: a9d9ff50af0432cbb950856daf08082fa51cbfa2  # frozen: v2.0.0
     hooks:
         - id: mypy
   - repo: https://github.com/deshaw/nbstripout-fast
-    rev: v1.1.2
+    rev: 7a2d10829dda779da62665c808e335784760c962  # frozen: v1.1.2
     hooks:
       - id: nbstripout-fast
