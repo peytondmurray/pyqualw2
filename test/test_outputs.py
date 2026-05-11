@@ -1,10 +1,46 @@
+import itertools
+from collections.abc import Iterator
 from pathlib import Path
 
+import numpy as np
 import pytest
 from matplotlib.testing.decorators import image_comparison
 from numpy.testing import assert_equal
 
 from pyqualw2.outputs import QWO, TWO, MultiRunResult, QWOLayers
+
+
+def make_integer_combinations(it: range) -> Iterator[tuple[int, ...]]:
+    """Make all possible combinations of the input iterator.
+
+    Yields
+    ------
+    Iterator[tuple[int, ...]]
+        Combinations of the input iterator of all possible lengths > 0
+
+    Examples
+    --------
+    >>> list(make_integer_combinations(range(1, 5)))
+    [
+
+        (1,),
+        (2,),
+        (3,),
+        (4,),
+        (1, 2),
+        (1, 3),
+        (1, 4),
+        (2, 3),
+        (2, 4),
+        (3, 4),
+        (1, 2, 3),
+        (1, 2, 4),
+        (1, 3, 4),
+        (2, 3, 4)
+    ]
+    """
+    for i in range(1, len(it)):
+        yield from itertools.combinations(it, i)
 
 
 @pytest.fixture
@@ -118,3 +154,61 @@ def test_multirun_get_two_structure_composite_data(multi_run_result):
     assert "JDAY" in data.columns
     assert len(data.columns) == len(res.runs) + 1
     assert {"Tmax [C]", "Tavg [C]", "Tmin [C]"} < set(stats.columns)
+
+
+@pytest.mark.parametrize(
+    "branches",
+    make_integer_combinations(range(1, 5)),
+)
+def test_mixing_temperature(multi_run_result, branches):
+    """Test that the mixing temperature of multiple outputs is correctly calculated."""
+    res = MultiRunResult(multi_run_result)
+    df = res.runs[0].mixing_temperature(*branches)
+    assert {"JDAY", "mixed_flow_temperature [C]"} == set(df.columns)
+
+    qwo = res.runs[0].qwo
+    two = res.runs[0].two
+
+    # The interpolated JDAY should cover the range defined by the QWO and TWO datasets
+    assert df["JDAY"].min() <= two.data["JDAY"].min()
+    assert df["JDAY"].max() >= two.data["JDAY"].max()
+    assert df["JDAY"].min() <= qwo.data["JDAY"].min()
+    assert df["JDAY"].max() >= qwo.data["JDAY"].max()
+
+    # Each mixing temperature should lie between the temperature of the individual
+    # temperatures of the branches. Interpolate each branch on the timestamps of the
+    # output, then check that the mixed flow temperature is between the hot and cold
+    # temperatures.
+    temps = []
+    for br in branches:
+        temps.append(
+            np.interp(
+                df["JDAY"],
+                two.data["JDAY"],
+                two.data[f"temperature_structure_{br} [C]"],
+            )
+        )
+
+    total_flow = np.sum(
+        [qwo.data[f"flow_structure_{br} [m^3/s]"] for br in branches],
+        axis=0,
+    )
+
+    stacked = np.vstack(temps)
+    hot = np.max(stacked, axis=0)
+    cold = np.min(stacked, axis=0)
+
+    col = "mixed_flow_temperature [C]"
+
+    # The mixing temperature must be between the cold and hot temperatures, or the
+    # flow must be zero (and therefore the mixed temperature equal to NaN)
+    assert (
+        (df[col] > cold)
+        | np.isclose(df[col], cold)
+        | ((total_flow == 0) & df[col].isna())
+    ).all()
+    assert (
+        (df[col] < hot)
+        | np.isclose(df[col], hot)
+        | ((total_flow == 0) & df[col].isna())
+    ).all()

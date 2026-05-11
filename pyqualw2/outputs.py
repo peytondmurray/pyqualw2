@@ -51,6 +51,10 @@ class QWO(OutputBase):
     data: pd.DataFrame
     filename: PathLike | str | None = None
 
+    def __post_init__(self):
+        # JDAY and QWD(m3s-1) aren't structure-specific temperature columns
+        self.n_structures = self.data.shape[1] - 2
+
     @classmethod
     def from_file(cls, filename: PathLike | str) -> Self:
         """Load a QWO file containing total flow data.
@@ -73,7 +77,7 @@ class QWO(OutputBase):
             header=None,
         ).dropna(axis="columns", how="all")
         df.columns = ["JDAY", "QWD [m^3/s]"] + [
-            f"flow_branch_{i} [m^3/s]" for i, _ in enumerate(df.columns[2:], start=1)
+            f"flow_structure_{i} [m^3/s]" for i, _ in enumerate(df.columns[2:], start=1)
         ]
 
         return cls(
@@ -225,6 +229,11 @@ class TWO(OutputBase):
         # JDAY and T [C] aren't structure-specific temperature columns
         self.n_structures = self.data.shape[1] - 2
 
+    def __str__(self):
+        if self.filename is not None:
+            return f"<TWO {Path(self.filename).name}>"
+        return "<TWO>"
+
     @classmethod
     def from_file(cls, filename: PathLike | str) -> Self:
         """Load a TWO file containing temperature data for each structure.
@@ -319,17 +328,10 @@ class TWO(OutputBase):
 class RunResult:
     """A container which holds the results of a single cequalw2 run."""
 
-    @staticmethod
-    def _find_two_file(path: PathLike | str) -> Path:
-        path = Path(path)
-        for file in (path / "outputs").iterdir():
-            if re.match(r"two_\d+.csv", file.name):
-                return file
-        raise ValueError(f"Cannot find a TWO file in {str(path)}.")
-
     def __init__(self, path: PathLike | str):
         self.path = Path(path)
         self.two = TWO.from_file(self._find_two_file(path))
+        self.qwo = QWO.from_file(self._find_qwo_file(path))
         self.name = self.path.name
 
     def __ge__(self, other):  # noqa: ANN001
@@ -339,7 +341,92 @@ class RunResult:
         return self.name == other.name
 
     def __str__(self):
-        return f"<RunResult name={self.name}>"
+        return "\n".join(
+            [
+                f"<RunResult name={self.name}",
+                indent("\n".join([str(self.two), str(self.qwo)]), prefix="  "),
+                ">",
+            ]
+        )
+
+    @staticmethod
+    def _find_qwo_file(path: PathLike | str) -> Path:
+        path = Path(path)
+        for file in (path / "outputs").iterdir():
+            if re.match(r"qwo_\d+.csv", file.name):
+                return file
+        raise ValueError(f"Cannot find a QWO file in {str(path)}.")
+
+    @staticmethod
+    def _find_two_file(path: PathLike | str) -> Path:
+        path = Path(path)
+        for file in (path / "outputs").iterdir():
+            if re.match(r"two_\d+.csv", file.name):
+                return file
+        raise ValueError(f"Cannot find a TWO file in {str(path)}.")
+
+    def mixing_temperature(self, *structures: int) -> pd.DataFrame:
+        """Compute the mixing temperature of the flow from one or more structures.
+
+        Parameters
+        ----------
+        structures : int
+            Structures to include in the calculation
+
+        Returns
+        -------
+        pd.DataFrame
+            A time series of the temperature of the mixed flow from the given outputs
+        """
+        if self.two.n_structures != self.qwo.n_structures:
+            raise ValueError(
+                f"The QWO file has {self.qwo.n_structures} structures, but the TWO "
+                f"file has {self.two.n_structures}. Are you sure these are from the "
+                "same simulation?"
+            )
+
+        if not all([0 < st <= self.two.n_structures for st in structures]):
+            raise ValueError(
+                f"Cannot calculate mixing temperature for structures: {structures}; "
+                f"all structures must be in the range (0, {self.two.n_structures}]"
+            )
+
+        # Interpolate the timestamps so that the flow and temperature data can be
+        # referenced to the same timestaps. Choose a min and max timestamp that covers
+        # both datasets (though these should have identical timestamps, for safety we
+        # don't assume...)
+        data = {}
+        two_jday = self.two.data["JDAY"].to_numpy()
+        qwo_jday = self.qwo.data["JDAY"].to_numpy()
+
+        min_jday = min(two_jday.min(), qwo_jday.min())
+        max_jday = max(two_jday.max(), qwo_jday.max())
+        len_jday = max(len(two_jday), len(qwo_jday))
+
+        data["JDAY"] = np.linspace(min_jday, max_jday, len_jday)
+        temp_flow_product = np.zeros(len_jday)
+        total_flow = np.zeros(len_jday)
+
+        for st in structures:
+            tcol = f"temperature_structure_{st} [C]"
+            qcol = f"flow_structure_{st} [m^3/s]"
+
+            temp = np.interp(
+                data["JDAY"],
+                self.two.data["JDAY"],
+                self.two.data[tcol],
+            )
+            flow = np.interp(
+                data["JDAY"],
+                self.qwo.data["JDAY"],
+                self.qwo.data[qcol],
+            )
+
+            temp_flow_product += temp * flow
+            total_flow += flow
+
+        data["mixed_flow_temperature [C]"] = temp_flow_product / total_flow
+        return pd.DataFrame(data)
 
 
 class MultiRunResult:
