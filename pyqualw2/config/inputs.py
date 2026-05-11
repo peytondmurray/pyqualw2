@@ -3,6 +3,7 @@ import warnings
 from abc import ABC, abstractmethod
 from collections.abc import Generator, Iterable
 from dataclasses import dataclass
+from datetime import datetime
 from io import StringIO
 from os import PathLike
 from pathlib import Path
@@ -17,9 +18,9 @@ from numpy.typing import NDArray
 
 from ..utils import (
     JULIAN_REFERENCE_START,
+    date_to_jday,
     get_path_relative_to_home,
     jday_to_date,
-    to_fractional_days,
 )
 
 
@@ -806,15 +807,41 @@ class W2ConSimpleInput(BaseInput):
         return float(tmstart), float(tmend), int(year)
 
     @timedata.setter
-    def timedata(self, value: tuple[float, float, int]):
+    def timedata(
+        self, value: tuple[float | datetime | str, float | datetime | str, int]
+    ):
         """Set the TMSTRT, TMEND, and YEAR values for the configuration.
 
         Parameters
         ----------
-        value : tuple[float, float, int]
-            A tuple of TMSTRT, TMEND, and YEAR to set
+        value : tuple[float | datetime | str, float | datetime | str, int]
+            A tuple of TMSTRT, TMEND, and YEAR to set, or a datetime object, or any
+            ISO 8609-formatted datetime string, e.g.
+
+                '2011-11-04'
+                '20111104'
+                '2011-11-04T00:05:23'
+                '2011-11-04T00:05:23Z'
+                '20111104T000523'
+                '2011-W01-2T00:05:23.283'
+                '2011-11-04 00:05:23.283'
+                '2011-11-04 00:05:23.283+00:00'
+                '2011-11-04T00:05:23+04:00'
+
+            See https://docs.python.org/3/library/datetime.html#datetime.datetime.fromisoformat
+            for more information.
         """
-        tmstart, tmend, year = value
+        start, end, year = value
+        if isinstance(start, datetime | str):
+            tmstart = date_to_jday(start)
+        else:
+            tmstart = start
+
+        if isinstance(end, datetime | str):
+            tmend = date_to_jday(end)
+        else:
+            tmend = end
+
         lines = self.content.splitlines(keepends=True)
         _, _, _, *rest = lines[self.time_lineno].split(",")
         lines[self.time_lineno] = ",".join([str(tmstart), str(tmend), str(year), *rest])
@@ -850,9 +877,7 @@ class TempDataInput(BaseInput):
         date_col = data.columns[0]
 
         # Convert the date to Julian days relative to JULIAN_REFERENCE_START
-        data[date_col] = to_fractional_days(
-            pd.to_datetime(data[date_col]) - JULIAN_REFERENCE_START
-        )
+        data[date_col] = date_to_jday(pd.to_datetime(data[date_col]))
 
         return cls(filename=filename, data=data)
 
@@ -911,7 +936,7 @@ class MetDataInput(BaseInput):
 
         # Subtract the difference between the target year and the current year
         dates = dates + pd.offsets.DateOffset(years=year - dates[0].year)
-        self.data["JDAY"] = to_fractional_days(dates - JULIAN_REFERENCE_START)
+        self.data["JDAY"] = date_to_jday(dates)
 
     @classmethod
     def from_file(cls, filename: PathLike | str) -> Self:
@@ -949,7 +974,7 @@ class MetDataInput(BaseInput):
 
         # Recompute the JDAY in case it isn't referenced to JULIAN_REFERENCE_START
         # Drop "date" because we refer to all dates by julian day
-        df["JDAY"] = to_fractional_days(df["date"] - JULIAN_REFERENCE_START)
+        df["JDAY"] = date_to_jday(df["date"])
         cols = ["JDAY"] + [col for col in df.columns if col not in ["JDAY", "date"]]
         return cls(
             data=df[cols],

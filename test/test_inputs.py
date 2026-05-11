@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -104,8 +105,12 @@ def test_modify_w2con_times(sample_w2_con):
 
     lines = w2con.content.splitlines()
     assert w2con.timedata == (35564.0416666667, 35569.9583333333, 1921)
+    w2con.timedata = ("1921-01-01", "1922-01-01", 1923)
+    assert w2con.timedata == (0, 365, 1923)
     w2con.timedata = (0, 40, 1922)
     assert w2con.timedata == (0, 40, 1922)
+    w2con.timedata = (datetime(1921, 1, 1), datetime(1922, 1, 1), 1923)
+    assert w2con.timedata == (0, 365, 1923)
     assert w2con.filename == sample_w2_con
 
     # No other lines should be touched

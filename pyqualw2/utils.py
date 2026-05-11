@@ -1,12 +1,11 @@
-import datetime
+from datetime import datetime, timedelta
 from os import PathLike
 from pathlib import Path
 from typing import overload
 
-import numpy as np
 import pandas as pd
 
-JULIAN_REFERENCE_START = datetime.datetime(1921, 1, 1)
+JULIAN_REFERENCE_START = datetime(1921, 1, 1)
 
 
 def get_path_relative_to_home(path: PathLike | str) -> str:
@@ -30,7 +29,7 @@ def get_path_relative_to_home(path: PathLike | str) -> str:
 
 
 @overload
-def jday_to_date(jday: float) -> datetime.datetime: ...
+def jday_to_date(jday: float) -> datetime: ...
 
 
 @overload
@@ -48,29 +47,56 @@ def jday_to_date(jday):
     Returns
     -------
     datetime.datetime | pd.Series
-        Datetime  associated with the input julian day
+        Datetime associated with the input julian day
     """
     if isinstance(jday, float):
-        return JULIAN_REFERENCE_START + datetime.timedelta(days=jday)
+        return JULIAN_REFERENCE_START + timedelta(days=jday)
 
     return pd.to_datetime(JULIAN_REFERENCE_START) + pd.to_timedelta(jday, "days")
 
 
-def to_fractional_days(series: pd.Series) -> pd.Series:
+@overload
+def date_to_jday(day: str) -> float: ...
+
+
+@overload
+def date_to_jday(day: datetime) -> float: ...
+
+
+@overload
+def date_to_jday(day: pd.Series) -> pd.Series: ...
+
+
+def date_to_jday(day):
     """Convert a timedelta64 pd.Series to a floating point fractional day.
 
     Parameters
     ----------
-    series : pd.Series
+    series : pd.Series | datetime.datetime | str
         Input series of dtype timedelta64
 
     Returns
     -------
-    pd.Series
-        The input timedelta, but in fractions of a day (floating point)
+    float | pd.Series
+        Time since JULIAN_REFERENCE_START in days (floating point)
     """
-    if series.dtype.type == np.timedelta64:
-        return series / pd.to_timedelta(1, "days")
-    raise ValueError(
-        f"Cannot convert series of dtype {series.dtype} to fractional days"
-    )
+    if isinstance(day, pd.Series):
+        if pd.api.types.is_datetime64_any_dtype(day.dtype):
+            return (day - JULIAN_REFERENCE_START) / pd.to_timedelta(1, "days")
+        if pd.api.types.is_string_dtype(day.dtype):
+            return (
+                pd.to_datetime(day, format="ISO8601") - JULIAN_REFERENCE_START
+            ) / pd.to_timedelta(1, "days")
+        raise ValueError(
+            f"Cannot convert series of dtype {day.dtype} to fractional days"
+        )
+
+    if isinstance(day, str):
+        return (datetime.fromisoformat(day) - JULIAN_REFERENCE_START) / timedelta(
+            days=1
+        )
+
+    if isinstance(day, datetime):
+        return (day - JULIAN_REFERENCE_START) / timedelta(days=1)
+
+    raise ValueError(f"Cannot convert object of type {type(day)} to fractional days")
