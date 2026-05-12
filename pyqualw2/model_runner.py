@@ -4,6 +4,7 @@ import platform
 import subprocess
 import tempfile
 import time
+from os import PathLike
 from pathlib import Path
 
 from pyqualw2.config.config import Config
@@ -27,7 +28,7 @@ class ModelRunner:
     def __init__(
         self,
         configuration: Config | list[Config],
-        output_dir: Path,
+        output_dir: PathLike | str,
         wait_time: int = 10,
     ):
         if isinstance(configuration, Config):
@@ -35,7 +36,7 @@ class ModelRunner:
         else:
             self.configs = configuration
 
-        self.output_dir = output_dir
+        self.output_dir = Path(output_dir)
         self.wait_time = wait_time
 
     def run(self, overwrite: bool = False):
@@ -75,7 +76,9 @@ class ModelRunner:
                         f"cequalw2 subprocess returned error code {retcode}"
                     )
 
-    def save_outputs(self, wd: Path, output_dir: Path, overwrite: bool = False):
+    def save_outputs(
+        self, wd: Path, output_dir: PathLike | str, overwrite: bool = False
+    ):
         """Copy the cequalw2-generated outputs to the output directory.
 
         We don't use `Path.copy()` here because
@@ -94,7 +97,7 @@ class ModelRunner:
         ----------
         wd : Path
             Working directory where cequalw2 is run
-        output_dir : Path
+        output_dir : PathLike | str
             Directory where the user has asked for results to be placed
         overwrite : bool
             If True, overwrite the output directory; if False and the output directory
@@ -106,6 +109,7 @@ class ModelRunner:
             Raised if `overwrite=False` is passed and the `output_dir` already contains
             files that would be overwritten by simulation output
         """
+        output_dir = Path(output_dir)
         if not output_dir.exists():
             output_dir.mkdir(parents=True)
 
