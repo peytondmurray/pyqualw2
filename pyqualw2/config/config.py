@@ -15,6 +15,10 @@ from .inputs import (
     W2ConSimpleInput,
 )
 
+DEFAULT_CEQUALW2_EXE_PATH = (
+    Path(__file__).parent.parent.parent / "cequalw2" / "w2_v45_64.exe"
+)
+
 
 class Config:
     """A container that holds all configuration data for a simulation."""
@@ -113,7 +117,7 @@ class Config:
         wind_sheltering: PathLike,
         temp_data: list[PathLike],
         temperature_tributaries: list[PathLike],
-        cequalw2_path: PathLike,
+        cequalw2_path: PathLike = DEFAULT_CEQUALW2_EXE_PATH,
         flow_data: PathLike | None = None,
         flow_data_date_col: str | None = None,
         flow_data_inflow_cols: list[list[str]] | None = None,
@@ -152,7 +156,8 @@ class Config:
         temperature_tributaries : PathLike
             Path to the temperature tributaries files, e.g. mtdt_br1.csv
         cequalw2_path : PathLike
-            Path to the cequalw2 binary
+            Path to the cequalw2 binary. If None, the default cequalw2 shipped with
+            pyqualw2 will be used.
         wind_sheltering : PathLike
             Path to the wind sheltering file, e.g. inputs/mwsc.npt
         flow_data_date_col: str | None

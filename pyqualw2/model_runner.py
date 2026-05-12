@@ -59,8 +59,8 @@ class ModelRunner:
 
                 # Make the outputs directory, otherwise cequalw2 will fail
                 (wd / "outputs").mkdir(exist_ok=True)
-
                 config.to_directory(wd, overwrite=True)
+
                 retcode = self.run_model(wd)
                 if retcode is None or retcode == 0:
                     # The subprocess return code is None if it was terminated early
@@ -163,8 +163,12 @@ class ModelRunner:
         idle_kill_flag = False
 
         last_access = time.time()
+
         process = subprocess.Popen(
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=str(wd)
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=str(wd),
         )
         if process.stdout is None or process.stderr is None:
             raise ValueError("Cannot poll subprocess if stdout or stderr is None")
