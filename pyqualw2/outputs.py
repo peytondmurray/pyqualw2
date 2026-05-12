@@ -3,6 +3,7 @@ import logging
 import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from datetime import datetime
 from io import StringIO
 from os import PathLike
 from pathlib import Path
@@ -18,7 +19,7 @@ from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-from pyqualw2.utils import jday_to_date
+from pyqualw2.utils import date_to_jday, jday_to_date
 
 log = logging.getLogger(__name__)
 
@@ -428,6 +429,55 @@ class RunResult:
         data["mixed_flow_temperature [C]"] = temp_flow_product / total_flow
         return pd.DataFrame(data)
 
+    def threshold_summary(
+        self,
+        structure: int,
+        threshold: float = 14.44,
+        date_range: tuple[str | datetime | float, str | datetime | float] | None = None,
+    ) -> pd.Series:
+        """Calculate a set of threshold-related summary statistics for the run.
+
+        Parameters
+        ----------
+        structure : int
+            Structure to use for the calculation
+        threshold : float
+            Egg mortality temperature threshold to set
+        date_range : tuple[str | datetime | float, str | datetime | float] | None
+            If provided, only calculate the summary stats in the given date range
+
+        Returns
+        -------
+        pd.Series
+            A dataset of descriptive statistics about the run
+        """
+        df = self.two.get_structure(structure)
+
+        if date_range is not None:
+            start, stop = date_range
+
+            if not isinstance(start, float):
+                start = date_to_jday(start)  # ty:ignore[no-matching-overload]
+
+            if not isinstance(stop, float):
+                stop = date_to_jday(stop)  # ty:ignore[no-matching-overload]
+        else:
+            start = df["JDAY"].min()
+            stop = df["JDAY"].max()
+
+        df = df.loc[(start <= df["JDAY"]) & (df["JDAY"] <= stop)]
+
+        col = "Temperature [C]"
+        data = {
+            "Tavg [C]": df[col].mean(),
+            "Tmin [C]": df[col].min(),
+            "Tmax [C]": df[col].max(),
+            "Days above threshold": float(
+                df["JDAY"].diff().loc[df[col] >= threshold].sum()
+            ),
+        }
+        return pd.Series(data, name=self.name)
+
 
 class MultiRunResult:
     """Class which manipulates outputs for multiple simulation runs."""
@@ -533,6 +583,34 @@ class MultiRunResult:
         stats["Tavg [C]"] = df[temperature_cols].mean(axis="columns")
 
         return df, pd.DataFrame(stats)
+
+    def threshold_summary(
+        self,
+        structure: int,
+        threshold: float = 14.44,
+        date_range: tuple[str | datetime | float, str | datetime | float] | None = None,
+    ) -> pd.DataFrame:
+        """Calculate a set of threshold-related summary statistics for all runs.
+
+        Parameters
+        ----------
+        structure : int
+            Structure to use for the calculation
+        threshold : float
+            Egg mortality temperature threshold to set
+        date_range : tuple[str | datetime | float, str | datetime | float] | None
+            If provided, only calculate the summary stats in the given date range
+
+        Returns
+        -------
+        pd.DataFrame
+            A dataset of descriptive statistics
+        """
+        dfs = []
+        for run in self.runs:
+            dfs.append(run.threshold_summary(structure, threshold, date_range))
+
+        return pd.concat(dfs, axis=1).T
 
     def get_days_above_threshold(
         self, structure: int, threshold: float = 14.44

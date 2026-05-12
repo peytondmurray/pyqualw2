@@ -212,3 +212,42 @@ def test_mixing_temperature(multi_run_result, branches):
         | np.isclose(df[col], hot)
         | ((total_flow == 0) & df[col].isna())
     ).all()
+
+
+@pytest.mark.parametrize(
+    "date_range",
+    [
+        (35564.0, 35565.0),
+        None,
+    ],
+)
+def test_threshold_summary(multi_run_result, date_range):
+    """Test that the threshold summary calculates the correct average temperature."""
+    mrr = MultiRunResult(multi_run_result)
+    structure = 4
+
+    df = mrr.threshold_summary(structure, date_range=date_range)
+    assert {"Tavg [C]", "Tmin [C]", "Tmax [C]", "Days above threshold"} == set(
+        df.columns
+    )
+
+    first_run_name = df.index[0]
+    for run in mrr.runs:
+        if run.name == first_run_name:
+            tdf = run.two.data
+            break
+
+    # Filter out the dates from the structure temperature data that aren't in the
+    # date range
+    if date_range is not None:
+        dmin, dmax = date_range
+    else:
+        dmin, dmax = tdf["JDAY"].min(), tdf["JDAY"].max()
+    tdf = tdf.loc[(dmin <= tdf["JDAY"]) & (tdf["JDAY"] <= dmax)]
+
+    # Check that the average temperature calculated here is the same as what appears in
+    # the aggregate dataframe
+    assert (
+        tdf[f"temperature_structure_{structure} [C]"].mean()
+        == df.loc[first_run_name, "Tavg [C]"]
+    ).all()
