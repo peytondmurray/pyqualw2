@@ -8,6 +8,7 @@ from os import PathLike
 from pathlib import Path
 
 from pyqualw2.config.config import Config
+from pyqualw2.utils import is_notebook
 
 log = logging.getLogger(__name__)
 
@@ -164,17 +165,23 @@ class ModelRunner:
 
         last_access = time.time()
 
+        stdout = None
+        stderr = None
+        if not is_notebook():
+            stdout = subprocess.PIPE
+            stderr = subprocess.PIPE
+
         process = subprocess.Popen(
             cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stdout=stdout,
+            stderr=stderr,
             cwd=str(wd),
         )
-        if process.stdout is None or process.stderr is None:
-            raise ValueError("Cannot poll subprocess if stdout or stderr is None")
 
-        os.set_blocking(process.stdout.fileno(), False)
-        os.set_blocking(process.stderr.fileno(), False)
+        if process.stdout is not None and process.stderr is not None:
+            os.set_blocking(process.stdout.fileno(), False)
+            os.set_blocking(process.stderr.fileno(), False)
+
         log.info(f"Launched process {process.pid} in working directory {str(wd)}...")
         # Check for writes to output files; if the last write is longer than
         # self.wait_time seconds ago, consider the simulation done. Kill the
@@ -191,12 +198,13 @@ class ModelRunner:
                 f"Polling process {process.pid}. Last observed change "
                 f"{time.time() - last_access:.2f}/{self.wait_time} ago..."
             )
-            out = process.stdout.readline()
-            err = process.stderr.readline()
-            if out:
-                log.info(f"[Process {process.pid}]: {out!r}")
-            if err:
-                log.error(f"[Process {process.pid}]: {err!r}")
+            if process.stdout is not None and process.stderr is not None:
+                out = process.stdout.readline()
+                err = process.stderr.readline()
+                if out:
+                    log.info(f"[Process {process.pid}]: {out!r}")
+                if err:
+                    log.error(f"[Process {process.pid}]: {err!r}")
 
             if time.time() - last_access > self.wait_time:
                 process.kill()
@@ -208,13 +216,14 @@ class ModelRunner:
         if platform.system() == "Windows":
             process.wait()
 
-        # Subprocess is terminated; flush output
-        out = process.stdout.readline()
-        err = process.stderr.readline()
-        if out:
-            log.info(f"[Process {process.pid}]: {out!r}")
-        if err:
-            log.error(f"[Process {process.pid}]: {err!r}")
+        if process.stdout is not None and process.stderr is not None:
+            # Subprocess is terminated; flush output
+            out = process.stdout.readline()
+            err = process.stderr.readline()
+            if out:
+                log.info(f"[Process {process.pid}]: {out!r}")
+            if err:
+                log.error(f"[Process {process.pid}]: {err!r}")
 
         if idle_kill_flag:
             return 0

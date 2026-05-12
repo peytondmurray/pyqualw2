@@ -100,3 +100,23 @@ def date_to_jday(day):
         return (day - JULIAN_REFERENCE_START) / timedelta(days=1)
 
     raise ValueError(f"Cannot convert object of type {type(day)} to fractional days")
+
+
+def is_notebook() -> bool:
+    """Check if the current python shell is running in a notebook.
+
+    Returns
+    -------
+    bool
+        True if it is, False otherwise
+    """
+    try:
+        shell = get_ipython().__class__.__name__  # type: ignore
+        if shell == "ZMQInteractiveShell":
+            return True  # Jupyter notebook or qtconsole
+        elif shell == "TerminalInteractiveShell":
+            return False  # Terminal running IPython
+        else:
+            return False  # Other type (?)
+    except NameError:
+        return False  # Probably standard Python interpreter
