@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 from matplotlib.testing.decorators import image_comparison
 
-from pyqualw2.config.inputs import (
+from pyqualw2.config import (
     BathymetryInput,
     FlowData,
     MetDataInput,

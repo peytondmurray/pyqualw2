@@ -2,8 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from pyqualw2 import model_runner
-from pyqualw2.config.config import Config
+from pyqualw2 import Config, ModelRunner
 from pyqualw2.config.inputs import FlowInput
 
 
@@ -71,7 +70,7 @@ def test_model_runner(tmp_path, sample_config):
     """Test the ModelRunner class."""
     test_dir = Path(__file__).parent.parent / "test" / "sample_data1"
     result_dir = tmp_path / "test_name"
-    Runner = model_runner.ModelRunner(sample_config, tmp_path)
+    Runner = ModelRunner(sample_config, tmp_path)
     Runner.run()
 
     # Check that the input files are all there

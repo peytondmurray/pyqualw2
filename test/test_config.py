@@ -3,7 +3,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from pyqualw2.config.config import Config
+from pyqualw2 import Config
 from pyqualw2.config.inputs import JULIAN_REFERENCE_START, FlowInput
 
 
