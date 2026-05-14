@@ -863,7 +863,7 @@ class TempDataInput(BaseInput):
         ----------
         filename : PathLike | str
             Path to inflow temperature data file. This must be a CSV with two columns:
-            `date`, and `temperature`.
+            ["Date", "Temperature [C]"].
 
         Returns
         -------
@@ -874,10 +874,17 @@ class TempDataInput(BaseInput):
             raise NotImplementedError
 
         data = pd.read_csv(filename)
-        date_col = data.columns[0]
+
+        if data.columns.to_list() != ["Date", "Temperature [C]"]:
+            raise ValueError(
+                "Historical temperature data files must have exactly two columns, "
+                f"named ['Date', 'Temperature [C]']. {filename} has these: "
+                f"{data.columns}"
+            )
 
         # Convert the date to Julian days relative to JULIAN_REFERENCE_START
-        data[date_col] = date_to_jday(pd.to_datetime(data[date_col]))
+        date_col = data.columns[0]
+        data[date_col] = date_to_jday(data[date_col])
 
         return cls(filename=filename, data=data)
 
