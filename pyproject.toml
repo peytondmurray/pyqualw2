@@ -25,6 +25,7 @@ dev = [
 ]
 test = [
     "pytest",
+    "pytest-cov",
 ]
 notebook = [
     "jupyterlab>=4.5.6",

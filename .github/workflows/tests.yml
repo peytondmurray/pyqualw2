@@ -36,7 +36,13 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest --e2e
+          # Run only the end to end tests without coverage
+          pytest -m e2e --e2e
+
+          # Run the unit tests with coverage, then write the report to the GITHUB_STEP_SUMMARY
+          # https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-commands#adding-a-job-summary
+          pytest --cov=pyqualw2 --cov-report=markdown
+          cat coverage.md >> $GITHUB_STEP_SUMMARY
 
       - name: Upload matplotlib test plots if tests fail
         if: ${{ failure() }}
