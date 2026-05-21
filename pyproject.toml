@@ -63,14 +63,16 @@ platforms = ["linux-64", "win-64"]
 [tool.pixi.pypi-dependencies]
 pyqualw2 = { path = ".", editable = true }
 
-[tool.pixi.tasks]
+[tool.pixi.feature.dev.tasks]
+install-lint = { cmd = ["prek install"]}
+lint = { cmd = ["prek run --all-files"]}
 
-[tool.pixi.dependencies]
-prek = ">=0.3.3,<0.4"
-ruff = ">=0.15.9,<0.16"
-pytest = ">=9.0.2,<10"
-mypy = ">=1.20.0,<2"
-pre-commit = ">=4.5.1,<5"
+[tool.pixi.feature.notebook.tasks]
+notebook = { cmd = ["jupyter", "lab"], description = "Launch a jupyter notebook environment" }
+
+[tool.pixi.environments]
+notebook = { features = ["notebook"] }
+all = { features = ["notebook", "dev", "test"] }
 
 [tool.ruff]
 line-length = 88

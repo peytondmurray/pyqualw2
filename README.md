@@ -31,36 +31,46 @@ burden of configuring, running, and generating insights from CE-QUAL-W2 output.
 
 ## Installation
 
+### Pixi (Recommended)
+
+1. If running on Linux, install [Wine](https://www.winehq.org/) so that the
+   CE-QUAL-W2 binary can be run.
+2. Install [`pixi`](https://pixi.prefix.dev/latest/installation/).
+2. Then install the project with `pixi install`.
+
+### Manual installation
+
 To install `pyqualw2`, simply
 
 ```bash
 pip install pyqualw2
 ```
 
-On Linux, you'll need [Wine](https://www.winehq.org/) installed for the
-CE-QUAL-W2 binary to be run, since it is compiled targeting Windows.
-
 ## Usage
 
 > [!WARNING]
-> The Python bindings are still under construction.
+> The Python interface is still under construction.
 
-`pyqualw2` provides Python bindings for CE-QUAL-W2, allowing simulations to be
-configured, run, and analyzed from inside Python.
-
-> [!WARNING]
-> The CLI is still under construction.
-
-`pyqualw2` also provides a CLI so that simulations can be done from the command
-line.
+`pyqualw2` provides a Python interface for CE-QUAL-W2, allowing simulations to
+be configured, run, and analyzed from inside Python.
 
 ## Development
 
-To set up your development environment, install the `dev` optional dependency
-group:
+### Pixi (Recommended)
+
+Install all the dependencies:
 
 ```bash
-pip install -e '.[dev]'
+pixi install --all
+```
+
+### Manual installation
+
+To set up your development environment, install the `dev` and `test` optional
+dependency group:
+
+```bash
+pip install -e '.[dev,test]'
 ```
 
 This will install the package along with some other developer tooling.
@@ -69,41 +79,40 @@ This will install the package along with some other developer tooling.
 
 This project uses pre-commit hooks to ensure code quality. To get started,
 ensure [`prek`](https://github.com/j178/prek) is installed (it's one of the
-dependencies included in the optional `dev` dependency group). Then run
+dependencies included in the optional `dev` dependency group).
+
+Run
+
+```bash
+pixi run install-lint
+```
+
+or, if you're not using pixi, just do
 
 ```bash
 prek install
 ```
 
-to install the pre-commit hooks. Read more about pre-commit hooks on the [`prek`
-github page](https://github.com/j178/prek).
+to install the pre-commit hooks.
+
+Whichever way these are installed, they will now be run on every `git commit`.
+To ignore the hooks temporarily, do `git commit -n`. To run them manually, run
+`pixi run lint` (if you're using pixi) or `prek run --all-files` if not. Read
+more about pre-commit hooks on the [`prek` github
+page](https://github.com/j178/prek).
 
 ## Testing
 
-To run tests, install the `test` dependency group:
-
-```bash
-pip install -e '.[test]'
-```
-
-Then run tests by calling `pytest` from the root of the repository. If you want
-to run end-to-end tests as well, run `pytest --e2e`; requires Wine if you're on
-Linux.
+Make sure the `test` optional dependencies are installed. Then run tests by
+calling `pytest` from the root of the repository, or `pixi run pytest` if you're
+using pixi. If you want to run end-to-end tests as well, pass the `--e2e` flag;
+this requires Wine if you're on Linux.
 
 ## Jupyter Notebooks
 
-Some example notebooks are provided in `notebooks/`. To use them, install the
-`notebook` dependency group:
-
-```bash
-pip install -e '.[notebook]'
-```
-
-and then start JupyterLab with
-
-```bash
-jupyter lab
-```
+Some example notebooks are provided in `notebooks/`. To use them, make sure the
+`notebook` optional dependencies are installed, then do `pixi run notebook`, or
+`jupyter lab` if you're not using pixi.
 
 See the [JupyterLab
 docs](https://jupyterlab.readthedocs.io/en/stable/index.html) for more
