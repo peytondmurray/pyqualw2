@@ -57,7 +57,7 @@ class Config:
 
         self.name = name
 
-    def parameterize(self, parameters: dict[str, Any]) -> list[Config]:
+    def parameterize(self, parameters: dict[str, Any]) -> list["Config"]:
         """Override settings for each parameter, generating a new set of Configs.
 
         See the documentation for pytest's `pytest.mark.parametrize` function, which
@@ -70,7 +70,7 @@ class Config:
 
         Returns
         -------
-        list["Config"]
+        list[Config]
             A list of Config objects, one for each value specified in `parameters`
         """
         results = []
