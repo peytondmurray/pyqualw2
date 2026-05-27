@@ -6,14 +6,14 @@ build-backend = "hatchling.build"
 name = "pyqualw2"
 description = "A CE-QUAL-W2 orchestration toolkit"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.13"
 dependencies = [
     "typer>=0.20",
     "pandas",
     "rich",
-    "tomli>=2.3.0,<3",
-    "matplotlib>=3.10.8",
-    "scipy>=1.17.1",
+    "tomli>=2.2.1,<3",
+    "matplotlib>=3.8",
+    "scipy>=1.14",
 ]
 dynamic = ["version"]
 
