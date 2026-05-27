@@ -1,4 +1,5 @@
 from pathlib import Path
+from unittest import mock
 
 import pytest
 
@@ -108,3 +109,12 @@ def test_model_runner(tmp_path, sample_config):
     # Check that there is an outputs directory, and that there are files there
     assert (result_dir / "outputs").exists()
     assert len(set((result_dir / "outputs").iterdir())) > 0
+
+
+@mock.patch("sys.platform", "emscripten")
+def test_model_runner_pyodide_fails(tmp_path, sample_config):
+    """Test that running in python compiled for emscripted gracefully fails."""
+    Runner = ModelRunner(sample_config, tmp_path)
+
+    with pytest.raises(ValueError, match="CE-QUAL-W2 models cannot currently be run"):
+        Runner.run()

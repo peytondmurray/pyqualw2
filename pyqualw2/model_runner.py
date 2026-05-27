@@ -2,6 +2,7 @@ import logging
 import os
 import platform
 import subprocess
+import sys
 import tempfile
 import time
 from os import PathLike
@@ -54,6 +55,12 @@ class ModelRunner:
         ValueError
             Raised if the cequalw2 subprocess returned nonzero
         """
+        if sys.platform == "emscripten":
+            raise ValueError(
+                "CE-QUAL-W2 models cannot currently be run in the browser-based "
+                "compute environment."
+            )
+
         for config in self.configs:
             with tempfile.TemporaryDirectory() as tempdir:
                 wd = Path(tempdir)
