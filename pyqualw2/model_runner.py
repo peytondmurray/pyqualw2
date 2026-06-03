@@ -1,6 +1,7 @@
 import logging
 import os
 import platform
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -131,13 +132,12 @@ class ModelRunner:
             )
 
         for f_from, f_to in zip(copy_from, copy_to, strict=True):
-            if not f_to.parent.exists():
-                f_to.parent.mkdir(parents=True, exist_ok=True)
+            f_to.parent.mkdir(parents=True, exist_ok=True)
 
             if f_to.exists() and overwrite:
                 f_to.unlink()
 
-            f_from.copy(f_to)
+            shutil.copy2(f_from, f_to)
 
     def run_model(self, wd: Path) -> int:
         """Run the cequalw2 binary in a subprocess.
