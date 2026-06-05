@@ -40,10 +40,10 @@ burden of configuring, running, and generating insights from CE-QUAL-W2 output.
 
 ### Manual installation
 
-To install `pyqualw2`, simply
+To install `pyqualw2`, ensure you have python installed. Then simply use `pip`:
 
 ```bash
-pip install pyqualw2
+pip install git+https://github.com/dwarfstar-dev/pyqualw2
 ```
 
 ## Usage
@@ -55,6 +55,13 @@ pip install pyqualw2
 be configured, run, and analyzed from inside Python.
 
 ## Development
+
+Start by cloning the repository:
+
+
+```bash
+git clone git@github.com:dwarfstar-dev/pyqualw2
+```
 
 ### Pixi (Recommended)
 

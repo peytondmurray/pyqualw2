@@ -31,6 +31,11 @@ notebook = [
     "jupyterlab>=4.5.6",
     "ipympl>=0.10.0",
 ]
+docs = [
+    "zensical",
+    "mkdocstrings-python",
+    "markdown-gfm-admonition",
+]
 
 [tool.pytest]
 log_cli = true
